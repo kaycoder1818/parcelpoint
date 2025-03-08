@@ -1,0 +1,69 @@
+/users/resetcode:
+  post:
+    summary: "Reset User Password"
+    description: "This endpoint allows a user to reset their password by providing a valid userId, resetCode, and new password."
+    tags: ["Users", "Password Management"]
+    parameters:
+      - name: "body"
+        in: "body"
+        required: true
+        schema:
+          type: "object"
+          properties:
+            userId:
+              type: "string"
+              description: "The unique identifier of the user"
+              example: "user123"
+            resetCode:
+              type: "string"
+              description: "The reset code sent to the user for password recovery"
+              example: "reset_code_123"
+            new_password:
+              type: "string"
+              description: "The new password for the user"
+              example: "new_secure_password_123"
+          required:
+            - userId
+            - resetCode
+            - new_password
+    responses:
+      '200':
+        description: "Password reset successfully"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                message:
+                  type: "string"
+                  example: "Password reset successfully"
+      '400':
+        description: "Bad Request if required fields are missing or the reset code is invalid"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "Missing required fields: userId, resetCode, or new_password"
+      '404':
+        description: "Not Found if the user is not found"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "User not found"
+      '500':
+        description: "Internal Server Error if there is an issue with the database or MySQL connection"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "MySQL database not responding, please check the database service"

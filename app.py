@@ -911,7 +911,6 @@ def unlock_locker():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-
 @app.route('/users/group/locker-assign', methods=['POST'])
 def locker_assign():
     try:
@@ -1101,6 +1100,126 @@ def verify_user_token():
             # Return a success message if the token matches and the status is updated
             return jsonify({"message": f"Token verified successfully and status updated to 'active' for userId {userId}"}), 200
 
+        else:
+            return jsonify({"error": "Database connection not available"}), 500
+
+    except mysql.connector.Error as e:
+        return handle_mysql_error(e)
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/users/resetcode', methods=['POST'])
+def reset_password():
+    try:
+        if not is_mysql_available():
+            return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
+        
+        # Get the data from the request (expecting JSON)
+        data = request.get_json()
+
+        # Check if 'userId', 'resetCode', and 'new_password' are provided in the request
+        if 'userId' not in data or 'resetCode' not in data or 'new_password' not in data:
+            return jsonify({"error": "Missing required fields: userId, resetCode, or new_password"}), 400
+        
+        userId = data['userId']
+        resetCode = data['resetCode']
+        new_password = data['new_password']
+
+        cursor = get_cursor()
+        if cursor:
+            # Query to find the user with the given userId and resetCode
+            sql_query = """
+            SELECT resetCode FROM users 
+            WHERE userId = %s
+            LIMIT 1
+            """
+            cursor.execute(sql_query, (userId,))
+            result = cursor.fetchone()
+
+            if result:
+                # Check if the resetCode matches
+                if result[0] == resetCode:
+                    # Update the password for the user
+                    sql_update_password = """
+                    UPDATE users
+                    SET passwordHash = %s
+                    WHERE userId = %s
+                    """
+                    cursor.execute(sql_update_password, (new_password, userId))
+                    db_connection.commit()
+                    cursor.close()
+
+                    # Return response with the message
+                    return jsonify({"message": "Password reset successfully"}), 200
+                else:
+                    cursor.close()
+                    return jsonify({"error": "Invalid reset code"}), 400
+            else:
+                cursor.close()
+                return jsonify({"error": "User not found"}), 404
+        
+        else:
+            return jsonify({"error": "Database connection not available"}), 500
+
+    except mysql.connector.Error as e:
+        return handle_mysql_error(e)
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/user/forgot-password', methods=['POST'])
+def forgot_password():
+    try:
+        if not is_mysql_available():
+            return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
+        
+        # Get the data from the request (expecting JSON)
+        data = request.get_json()
+
+        # Check if 'userId' and 'email' are provided in the request
+        if 'userId' not in data or 'email' not in data:
+            return jsonify({"error": "Missing required fields: userId or email"}), 400
+        
+        userId = data['userId']
+        email = data['email']
+
+        # Generate a random reset code (6 digits for simplicity)
+        resetCode = ''.join(random.choices(string.digits, k=6))
+
+        cursor = get_cursor()
+        if cursor:
+            # Query to find the user with the given userId and email
+            sql_query = """
+            SELECT email FROM users 
+            WHERE userId = %s
+            LIMIT 1
+            """
+            cursor.execute(sql_query, (userId,))
+            result = cursor.fetchone()
+
+            if result:
+                # Check if the email matches
+                if result[0] == email:
+                    # Update the resetCode for the user
+                    sql_update_reset_code = """
+                    UPDATE users
+                    SET resetCode = %s
+                    WHERE userId = %s
+                    """
+                    cursor.execute(sql_update_reset_code, (resetCode, userId))
+                    db_connection.commit()
+                    cursor.close()
+
+                    # Return response with the message and email
+                    return jsonify({"message": "Reset code generated successfully", "email": email}), 200
+                else:
+                    cursor.close()
+                    return jsonify({"error": "Email does not match the userId"}), 400
+            else:
+                cursor.close()
+                return jsonify({"error": "User not found"}), 404
+        
         else:
             return jsonify({"error": "Database connection not available"}), 500
 
