@@ -3,7 +3,6 @@ from flask import Flask, jsonify, request
 import mysql.connector
 import os
 from swagger.swaggerui import setup_swagger
-from datetime import datetime  # Ensure this import is added at the top of your file
 import random
 import string
 
@@ -549,11 +548,10 @@ def add_user():
             
             # Insert the new user into the 'users' table if userId does not exist
             sql_insert = """
-            INSERT INTO users (userId, passwordHash, fingerPrintId, role, groupId, email, lockerAssigned, status, token, resetCode, timestamp)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            INSERT INTO users (userId, passwordHash, fingerPrintId, role, groupId, email, lockerAssigned, status, token, resetCode)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """
-            # Prepare the data for insertion
-            timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            # Prepare the data for insertion without the timestamp
             data_values = (
                 data['userId'],
                 data['passwordHash'],
@@ -564,8 +562,7 @@ def add_user():
                 data['lockerAssigned'],
                 data['status'],
                 data['token'],
-                data['resetCode'],
-                timestamp
+                data['resetCode']
             )
 
             cursor.execute(sql_insert, data_values)
