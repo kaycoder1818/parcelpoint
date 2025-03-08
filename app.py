@@ -4,7 +4,6 @@ import mysql.connector
 from datetime import datetime
 import os
 from swagger.swaggerui import setup_swagger
-import datetime
 import random
 import string
 
