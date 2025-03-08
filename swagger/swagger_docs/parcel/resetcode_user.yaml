@@ -2,7 +2,7 @@
   post:
     summary: "Reset User Password"
     description: "This endpoint allows a user to reset their password by providing a valid userId, resetCode, and new password."
-    tags: ["Users", "Password Management"]
+    tags: ["Users"]
     parameters:
       - name: "body"
         in: "body"

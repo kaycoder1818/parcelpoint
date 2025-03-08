@@ -2,7 +2,7 @@
   post:
     summary: "Update Status for User by userId"
     description: "Updates the status for a specific user identified by userId. The request body must include the userId and the new_status."
-    tags: ["Users", "Status"]
+    tags: ["Users"]
     parameters:
       - name: "body"
         in: "body"
