@@ -884,6 +884,14 @@ def add_profile():
 
         cursor = get_cursor()
         if cursor:
+            # Check if the userId already exists
+            cursor.execute("SELECT * FROM profile WHERE userId = %s", (data['userId'],))
+            existing_profile = cursor.fetchone()
+
+            if existing_profile:
+                cursor.close()
+                return jsonify({"error": "userId already exists, cannot add a new profile with this userId"}), 400
+
             # Insert the new profile record into the 'profile' table
             sql_insert = """
             INSERT INTO profile (userId, firstName, lastName, suffix, contactNumber, email, address, birthday, photoURL)
@@ -949,12 +957,13 @@ def update_profile():
             birthday = data.get("birthday", existing_profile[8])
             photoURL = data.get("photoURL", existing_profile[9])
 
-            # Define SQL query to update the record
+            # Define SQL query to update the first matching record
             sql_update_profile = """
             UPDATE profile
             SET firstName = %s, lastName = %s, suffix = %s, contactNumber = %s, 
                 email = %s, address = %s, birthday = %s, photoURL = %s
             WHERE userId = %s
+            LIMIT 1
             """
             cursor.execute(sql_update_profile, (firstName, lastName, suffix, contactNumber, email, address, birthday, photoURL, userId))
             db_connection.commit()
@@ -989,8 +998,8 @@ def delete_profile():
                 cursor.close()
                 return jsonify({"error": "User not found"}), 404
 
-            # Define SQL query to delete the record
-            sql_delete_profile = "DELETE FROM profile WHERE userId = %s"
+            # Define SQL query to delete only the first matching record
+            sql_delete_profile = "DELETE FROM profile WHERE userId = %s LIMIT 1"
             cursor.execute(sql_delete_profile, (userId,))
             db_connection.commit()
             cursor.close()
