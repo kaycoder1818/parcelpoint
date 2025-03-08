@@ -104,7 +104,7 @@ def create_users_table():
                     status TEXT,
                     token TEXT,
                     resetCode TEXT,
-                    timestamp TEXT DEFAULT CURRENT_TIMESTAMP
+                    timestamp TIMESTAMP  DEFAULT CURRENT_TIMESTAMP
                 )
                 """
                 cursor.execute(sql_create_table)
@@ -145,7 +145,7 @@ def create_profile_table():
                     address TEXT,
                     birthday TEXT,
                     photoURL TEXT,
-                    timestamp TEXT DEFAULT CURRENT_TIMESTAMP
+                    timestamp TIMESTAMP  DEFAULT CURRENT_TIMESTAMP
                 )
                 """
                 cursor.execute(sql_create_table)
@@ -216,7 +216,7 @@ def create_notifications_table():
                     role TEXT,
                     status TEXT,
                     message TEXT,
-                    timestamp TEXT DEFAULT CURRENT_TIMESTAMP
+                    timestamp TIMESTAMP  DEFAULT CURRENT_TIMESTAMP
                 )
                 """
                 cursor.execute(sql_create_table)
@@ -253,7 +253,7 @@ def create_activity_table():
                     status TEXT,
                     type TEXT,
                     info TEXT,
-                    timestamp TEXT DEFAULT CURRENT_TIMESTAMP
+                    timestamp TIMESTAMP  DEFAULT CURRENT_TIMESTAMP
                 )
                 """
                 cursor.execute(sql_create_table)
