@@ -882,17 +882,17 @@ def locker_assign():
 
         cursor = get_cursor()
         if cursor:
-            # First, collect all records with the specified groupId and status "active"
-            cursor.execute("SELECT * FROM profile WHERE groupId = %s AND status = 'active'", (groupId,))
+            # First, collect all records from the users table with the specified groupId and status "active"
+            cursor.execute("SELECT * FROM users WHERE groupId = %s AND status = 'active'", (groupId,))
             active_records = cursor.fetchall()
 
             if not active_records:
                 cursor.close()
                 return jsonify({"error": "No active users found for the given groupId"}), 404
             
-            # Update the lockerAssigned value for all matching records
+            # Update the lockerAssigned value for all matching records in the users table
             sql_update_locker = """
-            UPDATE profile
+            UPDATE users
             SET lockerAssigned = %s
             WHERE groupId = %s AND status = 'active'
             """
@@ -912,6 +912,7 @@ def locker_assign():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+
 @app.route('/users/group/by-userid', methods=['POST'])
 def update_group_by_userid():
     try:
@@ -930,17 +931,17 @@ def update_group_by_userid():
 
         cursor = get_cursor()
         if cursor:
-            # First, look for the record with the given userId
-            cursor.execute("SELECT * FROM profile WHERE userId = %s", (userId,))
-            existing_profile = cursor.fetchone()
+            # First, look for the record with the given userId in the users table
+            cursor.execute("SELECT * FROM users WHERE userId = %s", (userId,))
+            existing_user = cursor.fetchone()
 
-            if not existing_profile:
+            if not existing_user:
                 cursor.close()
                 return jsonify({"error": "User not found"}), 404
 
-            # Update the groupId for the userId
+            # Update the groupId for the given userId in the users table
             sql_update_group = """
-            UPDATE profile
+            UPDATE users
             SET groupId = %s
             WHERE userId = %s
             """
@@ -959,6 +960,7 @@ def update_group_by_userid():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 
 ## ------- profile route ----------------##
 
