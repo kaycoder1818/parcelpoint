@@ -1,0 +1,63 @@
+/activity:
+  get:
+    summary: "Get All Activities"
+    description: "Retrieves all activities from the database and returns them in a list."
+    tags: ["Activity"]
+    responses:
+      '200':
+        description: "Successfully retrieved all activities"
+        content:
+          application/json:
+            schema:
+              type: "array"
+              items:
+                type: "object"
+                properties:
+                  id:
+                    type: "integer"
+                    description: "The unique identifier of the activity"
+                    example: 1
+                  userId:
+                    type: "string"
+                    description: "The unique identifier of the user associated with the activity"
+                    example: "user123"
+                  role:
+                    type: "string"
+                    description: "The role of the user associated with the activity"
+                    example: "admin"
+                  status:
+                    type: "string"
+                    description: "The status of the activity"
+                    example: "active"
+                  type:
+                    type: "string"
+                    description: "The type of the activity"
+                    example: "login"
+                  info:
+                    type: "string"
+                    description: "Additional information about the activity"
+                    example: "User logged into the system successfully"
+                  timestamp:
+                    type: "string"
+                    description: "The timestamp of when the activity occurred"
+                    example: "2025-03-08T15:00:00Z"
+      '200':
+        description: "No activities found"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                message:
+                  type: "string"
+                  example: "No activities found"
+      '500':
+        description: "Internal Server Error if there is an issue with the database or MySQL connection"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "MySQL database not responding, please check the database service"

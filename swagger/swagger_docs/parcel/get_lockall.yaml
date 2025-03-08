@@ -1,0 +1,36 @@
+/stores/lock-all:
+  get:
+    summary: "Lock all lockers"
+    description: "Locks all lockers (locker1, locker2, locker3) in the store."
+    tags: ["Stores", "ESP"]
+    responses:
+      '200':
+        description: "Successfully locked all lockers"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                message:
+                  type: "string"
+                  example: "All lockers (locker1, locker2, locker3) are now locked"
+      '500':
+        description: "Internal Server Error if there is an issue with the database or MySQL connection"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "MySQL database not responding, please check the database service"
+      '503':
+        description: "Service Unavailable if the database connection is not available"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "Database connection not available"

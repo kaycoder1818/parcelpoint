@@ -1,0 +1,84 @@
+/activity/by-user-id:
+  post:
+    summary: "Get Activities by User ID"
+    description: "Retrieves all activities for a specific user by their user ID, ordered by timestamp (latest to oldest)."
+    tags: ["Activity"]
+    parameters:
+      - name: "body"
+        in: "body"
+        required: true
+        schema:
+          type: "object"
+          properties:
+            userId:
+              type: "string"
+              description: "The unique identifier of the user"
+              example: "user123"
+    responses:
+      '200':
+        description: "Successfully retrieved activities for the given user"
+        content:
+          application/json:
+            schema:
+              type: "array"
+              items:
+                type: "object"
+                properties:
+                  id:
+                    type: "integer"
+                    description: "The unique identifier of the activity"
+                    example: 1
+                  userId:
+                    type: "string"
+                    description: "The unique identifier of the user associated with the activity"
+                    example: "user123"
+                  role:
+                    type: "string"
+                    description: "The role of the user associated with the activity"
+                    example: "admin"
+                  status:
+                    type: "string"
+                    description: "The status of the activity"
+                    example: "active"
+                  type:
+                    type: "string"
+                    description: "The type of the activity"
+                    example: "login"
+                  info:
+                    type: "string"
+                    description: "Additional information about the activity"
+                    example: "User logged into the system successfully"
+                  timestamp:
+                    type: "string"
+                    description: "The timestamp of when the activity occurred"
+                    example: "2025-03-08T15:00:00Z"
+      '200 (No Activities)':
+        description: "No activities found for the given userId"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                message:
+                  type: "string"
+                  example: "No activities found for userId 'user123'"
+      '400':
+        description: "Missing 'userId' in the request body"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "Missing 'userId' in request"
+      '500':
+        description: "Internal Server Error if there is an issue with the database or MySQL connection"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "MySQL database not responding, please check the database service"

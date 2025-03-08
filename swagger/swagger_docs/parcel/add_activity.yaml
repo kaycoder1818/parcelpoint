@@ -1,0 +1,89 @@
+/activity/add:
+  post:
+    summary: "Add Activity"
+    description: "Adds a new activity record to the database for a user, specifying the activity type, status, and additional information."
+    tags: ["Activity"]
+    parameters:
+      - name: "body"
+        in: "body"
+        required: true
+        schema:
+          type: "object"
+          properties:
+            userId:
+              type: "string"
+              description: "The unique identifier of the user"
+              example: "user123"
+            role:
+              type: "string"
+              description: "The role of the user"
+              example: "admin"
+            status:
+              type: "string"
+              description: "The status of the activity"
+              example: "active"
+            type:
+              type: "string"
+              description: "The type of the activity"
+              example: "login"
+            info:
+              type: "string"
+              description: "Additional information about the activity"
+              example: "User logged into the system successfully"
+          required:
+            - userId
+            - role
+            - status
+            - type
+            - info
+    responses:
+      '201':
+        description: "Activity added successfully"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                message:
+                  type: "string"
+                  example: "Activity added successfully"
+                userId:
+                  type: "string"
+                  description: "The unique identifier of the user"
+                  example: "user123"
+                role:
+                  type: "string"
+                  description: "The role of the user"
+                  example: "admin"
+                status:
+                  type: "string"
+                  description: "The status of the activity"
+                  example: "new"
+                type:
+                  type: "string"
+                  description: "The type of the activity"
+                  example: "login"
+                info:
+                  type: "string"
+                  description: "Additional information about the activity"
+                  example: "User logged into the system successfully"
+      '400':
+        description: "Bad Request if required fields are missing"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "Missing required fields"
+      '500':
+        description: "Internal Server Error if there is an issue with the database or MySQL connection"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "MySQL database not responding, please check the database service"

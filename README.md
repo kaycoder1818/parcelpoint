@@ -1,2 +1,1 @@
-# parcelpoint
-stable
+# appfinity

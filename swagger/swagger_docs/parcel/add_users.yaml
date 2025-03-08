@@ -1,0 +1,104 @@
+/users/add:
+  post:
+    summary: "Add a New User"
+    description: "Adds a new user to the database. The user must provide all required fields including 'userId', 'passwordHash', 'fingerPrintId', 'role', 'groupId', 'email', 'lockerAssigned', 'status', 'token', and 'resetCode'."
+    tags: ["Users"]
+    parameters:
+      - name: "body"
+        in: "body"
+        required: true
+        schema:
+          type: "object"
+          properties:
+            userId:
+              type: "string"
+              description: "The unique identifier for the user"
+              example: "user123"
+            passwordHash:
+              type: "string"
+              description: "The hashed password of the user"
+              example: "$2b$12$VvE5xF9sT/qjCjWkHH1vE.VmTaEN8gNN8NoZNW5O0Nm2c8p2kzA0G"
+            fingerPrintId:
+              type: "string"
+              description: "The fingerprint ID of the user"
+              example: "fp_12345"
+            role:
+              type: "string"
+              description: "The role of the user"
+              example: "admin"
+            groupId:
+              type: "string"
+              description: "The group ID to which the user belongs"
+              example: "group_1"
+            email:
+              type: "string"
+              description: "The email address of the user"
+              example: "user123@example.com"
+            lockerAssigned:
+              type: "string"
+              description: "The locker assigned to the user"
+              example: "locker_42"
+            status:
+              type: "string"
+              description: "The status of the user"
+              example: "active"
+            token:
+              type: "string"
+              description: "The security token for the user"
+              example: "securetoken123"
+            resetCode:
+              type: "string"
+              description: "Password reset code for the user"
+              example: "resetcode456"
+          required:
+            - userId
+            - passwordHash
+            - fingerPrintId
+            - role
+            - groupId
+            - email
+            - lockerAssigned
+            - status
+            - token
+            - resetCode
+    responses:
+      '201':
+        description: "New user added successfully"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                message:
+                  type: "string"
+                  example: "New user added successfully"
+                status:
+                  type: "string"
+                  example: "ok"
+                token:
+                  type: "string"
+                  example: "securetoken123"
+                timestamp:
+                  type: "string"
+                  format: "date-time"
+                  example: "2025-03-08T14:25:00"
+      '400':
+        description: "Bad Request if any required field is missing or if the userId already exists"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "Missing required field: userId"
+      '500':
+        description: "Internal Server Error if there is an issue with the database or MySQL connection"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "MySQL database not responding, please check the database service"

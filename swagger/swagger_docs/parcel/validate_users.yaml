@@ -1,0 +1,88 @@
+/users/validate:
+  post:
+    summary: "Validate User Credentials"
+    description: "Validates the provided 'userId' and 'passwordHash' by checking them against the database. Returns user details if valid or an error if invalid."
+    tags: ["Users"]
+    parameters:
+      - name: "body"
+        in: "body"
+        required: true
+        schema:
+          type: "object"
+          properties:
+            userId:
+              type: "string"
+              description: "The unique identifier of the user"
+              example: "user123"
+            passwordHash:
+              type: "string"
+              description: "The hashed password of the user"
+              example: "$2b$12$VvE5xF9sT/qjCjWkHH1vE.VmTaEN8gNN8NoZNW5O0Nm2c8p2kzA0G"
+          required:
+            - userId
+            - passwordHash
+    responses:
+      '200':
+        description: "User validated successfully"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                message:
+                  type: "string"
+                  example: "User validated successfully"
+                role:
+                  type: "string"
+                  description: "The role of the user"
+                  example: "admin"
+                fingerPrintId:
+                  type: "string"
+                  description: "The fingerprint ID associated with the user"
+                  example: "fp_12345"
+                groupId:
+                  type: "string"
+                  description: "The group ID of the user"
+                  example: "group_1"
+                status:
+                  type: "string"
+                  description: "The current status of the user"
+                  example: "active"
+                token:
+                  type: "string"
+                  description: "A security token for the user"
+                  example: "securetoken123"
+                timestamp:
+                  type: "string"
+                  format: "date-time"
+                  example: "2025-03-08T14:25:00"
+      '400':
+        description: "Bad Request if 'userId' or 'passwordHash' are missing from the request body"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "Missing 'userId' or 'passwordHash'"
+      '401':
+        description: "Unauthorized if the provided 'userId' or 'passwordHash' is incorrect"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "Invalid 'userId' or 'passwordHash'"
+      '500':
+        description: "Internal Server Error if there is an issue with the database or MySQL connection"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "MySQL database not responding, please check the database service"

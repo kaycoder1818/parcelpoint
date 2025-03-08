@@ -1,0 +1,54 @@
+/stores/update-locker:
+  put:
+    summary: "Update Locker Value"
+    description: "Updates the value of a specific locker (e.g., 'locker1', 'locker2', 'locker3') in the 'store' table. Requires the locker name and the new value to update."
+    tags: ["Stores", "ESP"]
+    parameters:
+      - name: "body"
+        in: "body"
+        required: true
+        schema:
+          type: "object"
+          properties:
+            lockerName:
+              type: "string"
+              description: "The name of the locker to update"
+              example: "locker1"
+            newValue:
+              type: "string"
+              description: "The new value to set for the specified locker"
+              example: "unlocked"
+          required:
+            - lockerName
+            - newValue
+    responses:
+      '200':
+        description: "Locker value updated successfully"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                message:
+                  type: "string"
+                  example: "Locker 'locker1' updated successfully to 'unlocked'"
+      '400':
+        description: "Bad Request if 'lockerName' or 'newValue' is missing, or if the locker name is invalid, or column does not exist in the store table"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "Invalid lockerName, must be 'locker1', 'locker2', or 'locker3'"
+      '500':
+        description: "Internal Server Error if there is an issue with the database or MySQL connection"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "MySQL database not responding, please check the database service"

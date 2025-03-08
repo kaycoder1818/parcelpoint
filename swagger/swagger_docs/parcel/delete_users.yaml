@@ -1,0 +1,50 @@
+/users/delete/:
+  delete:
+    summary: "Delete User by userId"
+    description: "Deletes a user record from the database using their 'userId'. The userId is required to identify the user to delete."
+    tags: ["Users"]
+    parameters:
+      - name: "body"
+        in: "body"
+        required: true
+        schema:
+          type: "object"
+          properties:
+            userId:
+              type: "string"
+              description: "The unique identifier of the user"
+              example: "user123"
+          required:
+            - userId
+    responses:
+      '200':
+        description: "User deleted successfully"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                message:
+                  type: "string"
+                  example: "User deleted successfully"
+                status:
+                  type: "string"
+                  example: "ok"
+                timestamp:
+                  type: "string"
+                  format: "date-time"
+                  example: "2025-03-08T14:25:00"
+      '400':
+        description: "Bad Request if 'userId' is missing"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "Missing required field: 'userId'"
+      '404':
+        description: "User Not Found if the userId does not exist"
+        content:
+  

@@ -1,0 +1,47 @@
+/activity/delete/by-user-id:
+  delete:
+    summary: "Delete Activities by User ID"
+    description: "Deletes all activities associated with a specific user by their user ID."
+    tags: ["Activity"]
+    parameters:
+      - name: "body"
+        in: "body"
+        required: true
+        schema:
+          type: "object"
+          properties:
+            userId:
+              type: "string"
+              description: "The unique identifier of the user"
+              example: "user123"
+    responses:
+      '200':
+        description: "Successfully deleted all activities for the given user"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                message:
+                  type: "string"
+                  example: "All activities for userId 'user123' have been deleted successfully"
+      '400':
+        description: "Missing 'userId' in the request body"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "Missing 'userId' in request"
+      '500':
+        description: "Internal Server Error if there is an issue with the database or MySQL connection"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "MySQL database not responding, please check the database service"

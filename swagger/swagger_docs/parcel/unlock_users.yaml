@@ -1,0 +1,59 @@
+/users/unlock-by/fingerprint-id:
+  post:
+    summary: "Unlock Locker by Fingerprint ID"
+    description: "Unlocks the locker assigned to a user by their fingerprint ID. The fingerprint ID must correspond to an active user in the system, and the associated locker will be unlocked."
+    tags: ["Users", "ESP"]
+    parameters:
+      - name: "body"
+        in: "body"
+        required: true
+        schema:
+          type: "object"
+          properties:
+            fingerPrintId:
+              type: "string"
+              description: "The fingerprint ID of the user trying to unlock the locker"
+              example: "fp_12345"
+          required:
+            - fingerPrintId
+    responses:
+      '200':
+        description: "Locker unlocked successfully"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                message:
+                  type: "string"
+                  example: "Locker 'locker_42' unlocked successfully"
+      '400':
+        description: "Bad Request if 'fingerPrintId' is missing or if the column does not exist in the 'store' table"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "Column 'locker_42' does not exist in the 'store' table"
+      '404':
+        description: "No active user found with the provided fingerprint"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "No active user found with the provided fingerprint"
+      '500':
+        description: "Internal Server Error if there is an issue with the database or MySQL connection"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "MySQL database not responding, please check the database service"

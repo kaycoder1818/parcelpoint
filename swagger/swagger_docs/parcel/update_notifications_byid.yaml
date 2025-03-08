@@ -1,0 +1,54 @@
+/notifications/update/by-user-id:
+  post:
+    summary: "Update Notifications Status by User ID"
+    description: "Updates the status of all notifications for a specific user based on the provided userId."
+    tags: ["Notifications"]
+    parameters:
+      - name: "body"
+        in: "body"
+        required: true
+        schema:
+          type: "object"
+          properties:
+            userId:
+              type: "string"
+              description: "The unique identifier of the user"
+              example: "user123"
+            status:
+              type: "string"
+              description: "The new status to set for the notifications"
+              example: "read"
+          required:
+            - userId
+            - status
+    responses:
+      '200':
+        description: "Notifications status updated successfully"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                message:
+                  type: "string"
+                  example: "Status of all notifications for userId 'user123' updated successfully"
+      '400':
+        description: "Bad Request if required fields are missing"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "Missing required fields"
+      '500':
+        description: "Internal Server Error if there is an issue with the database or MySQL connection"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "MySQL database not responding, please check the database service"

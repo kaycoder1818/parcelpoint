@@ -1,0 +1,66 @@
+/notifications/by-user-id:
+  post:
+    summary: "Get Notifications by User ID"
+    description: "Retrieves notifications for a specific user based on userId, role, and 'new' status, ordered by timestamp."
+    tags: ["Notifications"]
+    parameters:
+      - name: "body"
+        in: "body"
+        required: true
+        schema:
+          type: "object"
+          properties:
+            userId:
+              type: "string"
+              description: "The unique identifier of the user"
+              example: "user123"
+            role:
+              type: "string"
+              description: "The role of the user"
+              example: "admin"
+            status:
+              type: "string"
+              description: "The status of the notification"
+              example: "new"
+          required:
+            - userId
+            - role
+            - status
+    responses:
+      '200':
+        description: "Notifications retrieved successfully"
+        content:
+          application/json:
+            schema:
+              type: "array"
+              items:
+                type: "object"
+                properties:
+                  msg:
+                    type: "string"
+                    description: "The notification message"
+                    example: "Your locker has been unlocked successfully"
+                  timestamp:
+                    type: "string"
+                    description: "The timestamp when the notification was created"
+                    example: "2025-03-08T12:00:00Z"
+      '400':
+        description: "Bad Request if required fields are missing or status is not 'new'"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "Missing required fields or status is not 'new'"
+      '500':
+        description: "Internal Server Error if there is an issue with the database or MySQL connection"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "MySQL database not responding, please check the database service"

@@ -1,0 +1,79 @@
+/users/validate/fingerPrintId:
+  post:
+    summary: "Validate User by Fingerprint ID"
+    description: "Validates a user by their fingerprint ID. If the fingerprint matches, the user details such as userId, lockerAssigned, role, groupId, and status will be returned."
+    tags: ["Users"]
+    parameters:
+      - name: "body"
+        in: "body"
+        required: true
+        schema:
+          type: "object"
+          properties:
+            fingerPrintId:
+              type: "string"
+              description: "The fingerprint ID of the user to validate"
+              example: "fp_12345"
+          required:
+            - fingerPrintId
+    responses:
+      '200':
+        description: "Fingerprint validated successfully and user information returned"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                message:
+                  type: "string"
+                  example: "Fingerprint validated successfully"
+                userId:
+                  type: "string"
+                  description: "The unique identifier of the user"
+                  example: "user123"
+                lockerAssigned:
+                  type: "string"
+                  description: "The locker assigned to the user"
+                  example: "locker_42"
+                role:
+                  type: "string"
+                  description: "The role of the user"
+                  example: "admin"
+                groupId:
+                  type: "string"
+                  description: "The group ID of the user"
+                  example: "group_1"
+                status:
+                  type: "string"
+                  description: "The current status of the user"
+                  example: "active"
+      '400':
+        description: "Bad Request if 'fingerPrintId' is missing in the request body"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "Missing required field: 'fingerPrintId'"
+      '404':
+        description: "No matching fingerprint found"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "No matching fingerprint found"
+      '500':
+        description: "Internal Server Error if there is an issue with the database or MySQL connection"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "MySQL database not responding, please check the database service"

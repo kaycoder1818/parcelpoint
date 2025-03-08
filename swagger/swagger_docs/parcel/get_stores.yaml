@@ -1,0 +1,56 @@
+/stores:
+  get:
+    summary: "Retrieve All Stores"
+    description: "Fetches all records from the 'store' table, including information about the lockers (locker1, locker2, locker3) and their status."
+    tags: ["Stores"]
+    parameters: []
+    responses:
+      '200':
+        description: "List of stores fetched successfully"
+        content:
+          application/json:
+            schema:
+              type: "array"
+              items:
+                type: "object"
+                properties:
+                  id:
+                    type: "integer"
+                    description: "The unique identifier for the store"
+                    example: 1
+                  lockerId:
+                    type: "string"
+                    description: "The unique identifier for the locker"
+                    example: "locker_1"
+                  locker1:
+                    type: "string"
+                    description: "Status of locker1 (e.g., 'locked', 'unlocked')"
+                    example: "locked"
+                  locker2:
+                    type: "string"
+                    description: "Status of locker2 (e.g., 'locked', 'unlocked')"
+                    example: "unlocked"
+                  locker3:
+                    type: "string"
+                    description: "Status of locker3 (e.g., 'locked', 'unlocked')"
+                    example: "locked"
+      '404':
+        description: "No stores found in the 'store' table"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                message:
+                  type: "string"
+                  example: "No stores found"
+      '500':
+        description: "Internal Server Error if there is an issue with the database or MySQL connection"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "MySQL database not responding, please check the database service"
