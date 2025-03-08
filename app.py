@@ -1575,7 +1575,7 @@ def delete_activities_by_user_id():
 
 
 # Route to reconnect to MySQL
-@app.route('/reconnect-mysql', methods=['POST'])
+@app.route('/reconnect-mysql', methods=['GET'])
 def reconnect_mysql():
     if reconnect_to_mysql():
         return jsonify({"message": "Reconnected to MySQL successfully!"}), 200
