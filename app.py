@@ -21,34 +21,34 @@ setup_swagger(app)
 # Retrieve MySQL connection details from environment variable
 mysql_details = os.getenv('MYSQL_DETAILS')
 
-# if mysql_details:
-#     # Split the details by "@"
-#     details = mysql_details.split('@')
+if mysql_details:
+    # Split the details by "@"
+    details = mysql_details.split('@')
     
-#     # Extract the individual values
-#     host = details[0]
-#     user = details[1]
-#     password = details[2]
-#     database = details[3]
-#     port = int(details[4])
+    # Extract the individual values
+    host = details[0]
+    user = details[1]
+    password = details[2]
+    database = details[3]
+    port = int(details[4])
 
-#     # MySQL connection setup
-#     try:
-#         db_connection = mysql.connector.connect(
-#             host=host,
-#             user=user,
-#             password=password,
-#             database=database,
-#             port=port
-#         )
-#         print("Connection successful")
+    # MySQL connection setup
+    try:
+        db_connection = mysql.connector.connect(
+            host=host,
+            user=user,
+            password=password,
+            database=database,
+            port=port
+        )
+        print("Connection successful")
     
-#     except mysql.connector.Error as err:
-#         print(f"Error connecting to MySQL: {e}")
-#         db_connection = None
-# else:
-#     print("MYSQL_DETAILS environment variable is not set.")
-#     db_connection = None
+    except mysql.connector.Error as err:
+        print(f"Error connecting to MySQL: {e}")
+        db_connection = None
+else:
+    print("MYSQL_DETAILS environment variable is not set.")
+    db_connection = None
 
 def generate_random_string(length=32):
     return ''.join(random.choices(string.ascii_letters + string.digits, k=length))
