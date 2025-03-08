@@ -1,0 +1,64 @@
+/users/group/locker-assign:
+  post:
+    summary: "Assign Locker to Group"
+    description: "Assigns a locker to all active users in a specific group. Requires the groupId and lockerAssignedForAll in the request body."
+    tags: ["Users"]
+    parameters:
+      - name: "body"
+        in: "body"
+        required: true
+        schema:
+          type: "object"
+          properties:
+            groupId:
+              type: "string"
+              description: "The unique identifier of the group"
+              example: "group123"
+            lockerAssignedForAll:
+              type: "boolean"
+              description: "Indicates whether the locker is assigned to all users in the group"
+              example: true
+          required:
+            - groupId
+            - lockerAssignedForAll
+    responses:
+      '200':
+        description: "Locker assigned successfully for all active users in the group"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                message:
+                  type: "string"
+                  example: "Locker assigned successfully for all active users in group group123"
+      '400':
+        description: "Bad Request if required fields (groupId, lockerAssignedForAll) are missing"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "Missing required fields: groupId and lockerAssignedForAll"
+      '404':
+        description: "Not Found if no active users exist for the given groupId"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "No active users found for the given groupId"
+      '500':
+        description: "Internal Server Error if there is an issue with the database or MySQL connection"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "MySQL database not responding, please check the database service"

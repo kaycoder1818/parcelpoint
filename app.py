@@ -822,6 +822,101 @@ def unlock_locker():
         return jsonify({"error": str(e)}), 500
 
 
+@app.route('/users/group/locker-assign', methods=['POST'])
+def locker_assign():
+    try:
+        if not is_mysql_available():
+            return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
+        
+        # Get the data from the request (expecting JSON)
+        data = request.get_json()
+
+        # Check if groupId and lockerAssignedForAll are provided
+        if 'groupId' not in data or 'lockerAssignedForAll' not in data:
+            return jsonify({"error": "Missing required fields: groupId and lockerAssignedForAll"}), 400
+        
+        groupId = data['groupId']
+        lockerAssignedForAll = data['lockerAssignedForAll']
+
+        cursor = get_cursor()
+        if cursor:
+            # First, collect all records with the specified groupId and status "active"
+            cursor.execute("SELECT * FROM profile WHERE groupId = %s AND status = 'active'", (groupId,))
+            active_records = cursor.fetchall()
+
+            if not active_records:
+                cursor.close()
+                return jsonify({"error": "No active users found for the given groupId"}), 404
+            
+            # Update the lockerAssigned value for all matching records
+            sql_update_locker = """
+            UPDATE profile
+            SET lockerAssigned = %s
+            WHERE groupId = %s AND status = 'active'
+            """
+            cursor.execute(sql_update_locker, (lockerAssignedForAll, groupId))
+            db_connection.commit()
+            cursor.close()
+
+            # Return response with the message
+            return jsonify({"message": f"Locker assigned successfully for all active users in group {groupId}"}), 200
+
+        else:
+            return jsonify({"error": "Database connection not available"}), 500
+
+    except mysql.connector.Error as e:
+        return handle_mysql_error(e)
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/users/group/by-userid', methods=['POST'])
+def update_group_by_userid():
+    try:
+        if not is_mysql_available():
+            return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
+        
+        # Get the data from the request (expecting JSON)
+        data = request.get_json()
+
+        # Check if userId and new_groupId are provided
+        if 'userId' not in data or 'new_groupId' not in data:
+            return jsonify({"error": "Missing required fields: userId and new_groupId"}), 400
+        
+        userId = data['userId']
+        new_groupId = data['new_groupId']
+
+        cursor = get_cursor()
+        if cursor:
+            # First, look for the record with the given userId
+            cursor.execute("SELECT * FROM profile WHERE userId = %s", (userId,))
+            existing_profile = cursor.fetchone()
+
+            if not existing_profile:
+                cursor.close()
+                return jsonify({"error": "User not found"}), 404
+
+            # Update the groupId for the userId
+            sql_update_group = """
+            UPDATE profile
+            SET groupId = %s
+            WHERE userId = %s
+            """
+            cursor.execute(sql_update_group, (new_groupId, userId))
+            db_connection.commit()
+            cursor.close()
+
+            # Return response with the message
+            return jsonify({"message": f"Group ID updated successfully for userId {userId}"}), 200
+
+        else:
+            return jsonify({"error": "Database connection not available"}), 500
+
+    except mysql.connector.Error as e:
+        return handle_mysql_error(e)
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 ## ------- profile route ----------------##
 
