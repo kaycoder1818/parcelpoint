@@ -18,6 +18,9 @@ setup_swagger(app)
 # Retrieve MySQL connection details from environment variable
 mysql_details = os.getenv('MYSQL_DETAILS')
 
+# Initialize the global db_connection variable
+db_connection = None
+
 if mysql_details:
     # Split the details by "@"
     details = mysql_details.split('@')
@@ -48,6 +51,45 @@ if mysql_details:
 else:
     print("MYSQL_DETAILS environment variable is not set.")
     db_connection = None
+
+
+# Helper function to reconnect to MySQL
+def reconnect_to_mysql():
+    global db_connection
+
+    mysql_details = os.getenv('MYSQL_DETAILS')
+
+    if mysql_details:
+        # Split the details by "@"
+        details = mysql_details.split('@')
+
+        # Extract the individual values
+        host = details[0]
+        user = details[1]
+        password = details[2]
+        database = details[3]
+        port = int(details[4])
+
+        # MySQL connection setup
+        try:
+            db_connection = mysql.connector.connect(
+                host=host,
+                user=user,
+                password=password,
+                database=database,
+                port=port
+            )
+            print("Reconnection successful")
+            return True
+
+        except mysql.connector.Error as err:
+            print(f"Error reconnecting to MySQL: {err}")
+            db_connection = None
+            return False
+    else:
+        print("MYSQL_DETAILS environment variable is not set.")
+        db_connection = None
+        return False
 
 def generate_random_string(length=32):
     return ''.join(random.choices(string.ascii_letters + string.digits, k=length))
@@ -1530,6 +1572,15 @@ def delete_activities_by_user_id():
             return jsonify({"error": "Database connection not available"}), 500
     except mysql.connector.Error as e:
         return handle_mysql_error(e)
+
+
+# Route to reconnect to MySQL
+@app.route('/reconnect-mysql', methods=['POST'])
+def reconnect_mysql():
+    if reconnect_to_mysql():
+        return jsonify({"message": "Reconnected to MySQL successfully!"}), 200
+    else:
+        return jsonify({"error": "Failed to reconnect to MySQL."}), 500
 
 
 @app.route('/', methods=['GET'])
