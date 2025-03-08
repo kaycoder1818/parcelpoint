@@ -44,6 +44,7 @@ if mysql_details:
     except mysql.connector.Error as err:
         print(f"Error connecting to MySQL: {e}")
         db_connection = None
+
 else:
     print("MYSQL_DETAILS environment variable is not set.")
     db_connection = None
@@ -819,6 +820,186 @@ def unlock_locker():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+
+## ------- profile route ----------------##
+
+@app.route('/profile', methods=['GET'])
+def get_all_profiles():
+    try:
+        if not is_mysql_available():
+            return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
+        
+        cursor = get_cursor()
+        if cursor:
+            # Fetch all records from the 'profile' table
+            cursor.execute("SELECT * FROM profile")
+            profiles = cursor.fetchall()
+
+            if not profiles:
+                cursor.close()
+                return jsonify({"message": "No profiles found"}), 404
+
+            # Format the results into a list of dictionaries
+            profile_list = []
+            for profile in profiles:
+                profile_dict = {
+                    "id": profile[0],
+                    "userId": profile[1],
+                    "firstName": profile[2],
+                    "lastName": profile[3],
+                    "suffix": profile[4],
+                    "contactNumber": profile[5],
+                    "email": profile[6],
+                    "address": profile[7],
+                    "birthday": profile[8],
+                    "photoURL": profile[9],
+                    "timestamp": profile[10]
+                }
+                profile_list.append(profile_dict)
+
+            cursor.close()
+
+            return jsonify({"profiles": profile_list}), 200
+        else:
+            return jsonify({"error": "Database connection not available"}), 500
+    except mysql.connector.Error as e:
+        return handle_mysql_error(e)
+
+@app.route('/profile/add', methods=['POST'])
+def add_profile():
+    try:
+        if not is_mysql_available():
+            return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
+        
+        # Get the data from the request (expecting JSON)
+        data = request.get_json()
+
+        # Check if all required fields are provided
+        required_fields = ['userId', 'firstName', 'lastName', 'contactNumber', 'email', 'address', 'birthday', 'photoURL']
+        for field in required_fields:
+            if field not in data:
+                return jsonify({"error": f"Missing required field: {field}"}), 400
+
+        cursor = get_cursor()
+        if cursor:
+            # Insert the new profile record into the 'profile' table
+            sql_insert = """
+            INSERT INTO profile (userId, firstName, lastName, suffix, contactNumber, email, address, birthday, photoURL)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """
+            # Prepare the data for insertion
+            data_values = (
+                data['userId'],
+                data['firstName'],
+                data['lastName'],
+                data.get('suffix', None),  # optional field
+                data['contactNumber'],
+                data['email'],
+                data['address'],
+                data['birthday'],
+                data['photoURL']
+            )
+
+            cursor.execute(sql_insert, data_values)
+            db_connection.commit()
+            cursor.close()
+            return jsonify({"message": "Profile added successfully"}), 201
+
+        else:
+            return jsonify({"error": "Database connection not available"}), 500
+
+    except mysql.connector.Error as e:
+        return handle_mysql_error(e)
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/profile/update', methods=['PUT'])
+def update_profile():
+    try:
+        if not is_mysql_available():
+            return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
+        
+        cursor = get_cursor()
+        if cursor:
+            # Extract the data from the request body
+            data = request.get_json()
+            userId = data.get("userId")
+            
+            if not userId:
+                return jsonify({"error": "userId is required"}), 400
+
+            # Check if the userId exists in the table
+            cursor.execute("SELECT * FROM profile WHERE userId = %s", (userId,))
+            existing_profile = cursor.fetchone()
+
+            if not existing_profile:
+                cursor.close()
+                return jsonify({"error": "User not found"}), 404
+
+            # Get the fields from the request body or use existing values if not provided
+            firstName = data.get("firstName", existing_profile[2])
+            lastName = data.get("lastName", existing_profile[3])
+            suffix = data.get("suffix", existing_profile[4])
+            contactNumber = data.get("contactNumber", existing_profile[5])
+            email = data.get("email", existing_profile[6])
+            address = data.get("address", existing_profile[7])
+            birthday = data.get("birthday", existing_profile[8])
+            photoURL = data.get("photoURL", existing_profile[9])
+
+            # Define SQL query to update the record
+            sql_update_profile = """
+            UPDATE profile
+            SET firstName = %s, lastName = %s, suffix = %s, contactNumber = %s, 
+                email = %s, address = %s, birthday = %s, photoURL = %s
+            WHERE userId = %s
+            """
+            cursor.execute(sql_update_profile, (firstName, lastName, suffix, contactNumber, email, address, birthday, photoURL, userId))
+            db_connection.commit()
+            cursor.close()
+
+            return jsonify({"message": "Profile updated successfully"}), 200
+        else:
+            return jsonify({"error": "Database connection not available"}), 500
+    except mysql.connector.Error as e:
+        return handle_mysql_error(e)
+
+@app.route('/profile/delete', methods=['DELETE'])
+def delete_profile():
+    try:
+        if not is_mysql_available():
+            return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
+        
+        cursor = get_cursor()
+        if cursor:
+            # Extract the userId from the request body
+            data = request.get_json()
+            userId = data.get("userId")
+            
+            if not userId:
+                return jsonify({"error": "userId is required"}), 400
+
+            # Check if the userId exists in the table
+            cursor.execute("SELECT * FROM profile WHERE userId = %s", (userId,))
+            existing_profile = cursor.fetchone()
+
+            if not existing_profile:
+                cursor.close()
+                return jsonify({"error": "User not found"}), 404
+
+            # Define SQL query to delete the record
+            sql_delete_profile = "DELETE FROM profile WHERE userId = %s"
+            cursor.execute(sql_delete_profile, (userId,))
+            db_connection.commit()
+            cursor.close()
+
+            return jsonify({"message": "Profile deleted successfully"}), 200
+        else:
+            return jsonify({"error": "Database connection not available"}), 500
+    except mysql.connector.Error as e:
+        return handle_mysql_error(e)
 
 
 ## ------ stores routes ---------------- ##

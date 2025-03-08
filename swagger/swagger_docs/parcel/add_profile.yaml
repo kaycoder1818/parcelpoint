@@ -1,0 +1,89 @@
+/profile/add:
+  post:
+    summary: "Add Profile"
+    description: "Adds a new profile record to the database for a user, including details such as name, contact information, address, birthday, and photo."
+    tags: ["Profile"]
+    parameters:
+      - name: "body"
+        in: "body"
+        required: true
+        schema:
+          type: "object"
+          properties:
+            userId:
+              type: "string"
+              description: "The unique identifier of the user"
+              example: "user123"
+            firstName:
+              type: "string"
+              description: "The first name of the user"
+              example: "John"
+            lastName:
+              type: "string"
+              description: "The last name of the user"
+              example: "Doe"
+            suffix:
+              type: "string"
+              description: "Optional suffix for the user's name (e.g., Jr, Sr)"
+              example: "Jr"
+            contactNumber:
+              type: "string"
+              description: "The contact number of the user"
+              example: "+1234567890"
+            email:
+              type: "string"
+              description: "The email address of the user"
+              example: "john.doe@example.com"
+            address:
+              type: "string"
+              description: "The address of the user"
+              example: "1234 Elm Street, Springfield"
+            birthday:
+              type: "string"
+              format: "date"
+              description: "The birthday of the user"
+              example: "1990-01-01"
+            photoURL:
+              type: "string"
+              description: "The URL to the user's profile photo"
+              example: "https://example.com/photo.jpg"
+          required:
+            - userId
+            - firstName
+            - lastName
+            - contactNumber
+            - email
+            - address
+            - birthday
+            - photoURL
+    responses:
+      '201':
+        description: "Profile added successfully"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                message:
+                  type: "string"
+                  example: "Profile added successfully"
+      '400':
+        description: "Bad Request if required fields are missing"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "Missing required field: userId"
+      '500':
+        description: "Internal Server Error if there is an issue with the database or MySQL connection"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "MySQL database not responding, please check the database service"
