@@ -1,0 +1,80 @@
+/users/validate-active:
+  post:
+    summary: "Validate Active User"
+    description: "Validates the user by checking the provided userId, passwordHash, and ensuring the status is 'active'."
+    tags: ["Users"]
+    parameters:
+      - name: "body"
+        in: "body"
+        required: true
+        schema:
+          type: "object"
+          properties:
+            userId:
+              type: "string"
+              description: "The unique identifier of the user"
+              example: "user123"
+            passwordHash:
+              type: "string"
+              description: "The hashed password of the user"
+              example: "hashed_password_123"
+          required:
+            - userId
+            - passwordHash
+    responses:
+      '200':
+        description: "User validated successfully and status is 'active'"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                message:
+                  type: "string"
+                  example: "User validated successfully"
+                role:
+                  type: "string"
+                  description: "The role of the user"
+                  example: "admin"
+                fingerPrintId:
+                  type: "string"
+                  description: "The fingerprint ID of the user"
+                  example: "fingerprint_12345"
+                groupId:
+                  type: "string"
+                  description: "The group ID the user belongs to"
+                  example: "groupA"
+                status:
+                  type: "string"
+                  description: "The status of the user"
+                  example: "active"
+      '400':
+        description: "Bad Request if required fields (userId, passwordHash) are missing"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "Missing 'userId' or 'passwordHash'"
+      '401':
+        description: "Unauthorized if the provided userId, passwordHash is incorrect, or the user status is not 'active'"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "Invalid 'userId' or 'passwordHash', or user is not active"
+      '500':
+        description: "Internal Server Error if there is an issue with the database or MySQL connection"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "MySQL database not responding, please check the database service"

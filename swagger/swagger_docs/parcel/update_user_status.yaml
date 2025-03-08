@@ -1,0 +1,64 @@
+/users/status/by-userid:
+  post:
+    summary: "Update Status for User by userId"
+    description: "Updates the status for a specific user identified by userId. The request body must include the userId and the new_status."
+    tags: ["Users", "Status"]
+    parameters:
+      - name: "body"
+        in: "body"
+        required: true
+        schema:
+          type: "object"
+          properties:
+            userId:
+              type: "string"
+              description: "The unique identifier of the user"
+              example: "user123"
+            new_status:
+              type: "string"
+              description: "The new status to assign to the user"
+              example: "active"
+          required:
+            - userId
+            - new_status
+    responses:
+      '200':
+        description: "Status updated successfully for the user"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                message:
+                  type: "string"
+                  example: "Status updated successfully for userId user123"
+      '400':
+        description: "Bad Request if required fields (userId, new_status) are missing"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "Missing required fields: userId and new_status"
+      '404':
+        description: "Not Found if the userId does not exist in the database"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "User not found"
+      '500':
+        description: "Internal Server Error if there is an issue with the database or MySQL connection"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "MySQL database not responding, please check the database service"

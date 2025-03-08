@@ -671,6 +671,54 @@ def validate_user():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route('/users/validate-active', methods=['POST'])
+def validate_user_active():
+    try:
+        if not is_mysql_available():
+            return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
+        
+        # Get the data from the request (expecting JSON)
+        data = request.get_json()
+
+        # Check if 'userId' and 'passwordHash' are provided in the request
+        if 'userId' not in data or 'passwordHash' not in data:
+            return jsonify({"error": "Missing 'userId' or 'passwordHash'"}), 400
+        
+        cursor = get_cursor()
+        if cursor:
+            # Query to find the first match of 'userId', 'passwordHash', and 'status' = 'active'
+            sql_query = """
+            SELECT role, fingerPrintId, groupId, status FROM users 
+            WHERE userId = %s AND passwordHash = %s AND status = 'active'
+            LIMIT 1
+            """
+            cursor.execute(sql_query, (data['userId'], data['passwordHash']))
+            result = cursor.fetchone()
+
+            if result:
+                # If user is found and status is active, return relevant details
+                user_info = {
+                    "message": "User validated successfully",
+                    "role": result[0],
+                    "fingerPrintId": result[1],
+                    "groupId": result[2],
+                    "status": result[3]
+                }
+                cursor.close()
+                return jsonify(user_info), 200
+            else:
+                cursor.close()
+                return jsonify({"error": "Invalid 'userId' or 'passwordHash', or user is not active"}), 401
+        
+        else:
+            return jsonify({"error": "Database connection not available"}), 500
+
+    except mysql.connector.Error as e:
+        return handle_mysql_error(e)
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 ## update password by userId
 @app.route('/users/update-password/', methods=['PUT'])
 def update_password():
@@ -951,6 +999,107 @@ def update_group_by_userid():
 
             # Return response with the message
             return jsonify({"message": f"Group ID updated successfully for userId {userId}"}), 200
+
+        else:
+            return jsonify({"error": "Database connection not available"}), 500
+
+    except mysql.connector.Error as e:
+        return handle_mysql_error(e)
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/users/status/by-userid', methods=['POST'])
+def update_status_by_userid():
+    try:
+        if not is_mysql_available():
+            return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
+        
+        # Get the data from the request (expecting JSON)
+        data = request.get_json()
+
+        # Check if userId and new_status are provided
+        if 'userId' not in data or 'new_status' not in data:
+            return jsonify({"error": "Missing required fields: userId and new_status"}), 400
+        
+        userId = data['userId']
+        new_status = data['new_status']
+
+        cursor = get_cursor()
+        if cursor:
+            # First, look for the record with the given userId in the users table
+            cursor.execute("SELECT * FROM users WHERE userId = %s", (userId,))
+            existing_user = cursor.fetchone()
+
+            if not existing_user:
+                cursor.close()
+                return jsonify({"error": "User not found"}), 404
+
+            # Update the status for the given userId in the users table
+            sql_update_status = """
+            UPDATE users
+            SET status = %s
+            WHERE userId = %s
+            """
+            cursor.execute(sql_update_status, (new_status, userId))
+            db_connection.commit()
+            cursor.close()
+
+            # Return response with the message
+            return jsonify({"message": f"Status updated successfully for userId {userId}"}), 200
+
+        else:
+            return jsonify({"error": "Database connection not available"}), 500
+
+    except mysql.connector.Error as e:
+        return handle_mysql_error(e)
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/users/verify', methods=['GET'])
+def verify_user_token():
+    try:
+        if not is_mysql_available():
+            return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
+
+        # Get the query parameters (token and userId)
+        token = request.args.get('token')
+        userId = request.args.get('userId')
+
+        if not token or not userId:
+            return jsonify({"error": "Missing required query parameters: token and userId"}), 400
+        
+        cursor = get_cursor()
+        if cursor:
+            # Look for the record with the given userId and status "inactive"
+            cursor.execute("SELECT * FROM users WHERE userId = %s AND status = 'inactive'", (userId,))
+            user = cursor.fetchone()
+
+            if not user:
+                cursor.close()
+                return jsonify({"error": "User not found or user is not inactive"}), 404
+
+            # Compare the token from query parameter with the token stored in the database for that userId
+            stored_token = user[9]  # Assuming 'token' is in the 10th column (index 9) of the 'users' table
+
+            if token != stored_token:
+                cursor.close()
+                return jsonify({"error": "Invalid token"}), 401
+
+            # Update the status to "active" if token matches
+            sql_update_status = """
+            UPDATE users
+            SET status = 'active'
+            WHERE userId = %s
+            """
+            cursor.execute(sql_update_status, (userId,))
+            db_connection.commit()
+            cursor.close()
+
+            # Return a success message if the token matches and the status is updated
+            return jsonify({"message": f"Token verified successfully and status updated to 'active' for userId {userId}"}), 200
 
         else:
             return jsonify({"error": "Database connection not available"}), 500

@@ -1,0 +1,71 @@
+/users/verify:
+  get:
+    summary: "Verify User Token and Activate User"
+    description: "Verifies the token for a specific user by userId. If the token is correct, the user's status is updated to 'active'."
+    tags: ["Users"]
+    parameters:
+      - name: "token"
+        in: "query"
+        required: true
+        schema:
+          type: "string"
+          description: "The verification token for the user"
+          example: "example-token-12345"
+      - name: "userId"
+        in: "query"
+        required: true
+        schema:
+          type: "string"
+          description: "The unique identifier of the user"
+          example: "user123"
+    responses:
+      '200':
+        description: "Token verified successfully and user status updated to 'active'"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                message:
+                  type: "string"
+                  example: "Token verified successfully and status updated to 'active' for userId user123"
+      '400':
+        description: "Bad Request if required query parameters (token, userId) are missing"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "Missing required query parameters: token and userId"
+      '401':
+        description: "Unauthorized if the provided token is invalid"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "Invalid token"
+      '404':
+        description: "Not Found if the user is not found or the user is not inactive"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "User not found or user is not inactive"
+      '500':
+        description: "Internal Server Error if there is an issue with the database or MySQL connection"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "MySQL database not responding, please check the database service"
