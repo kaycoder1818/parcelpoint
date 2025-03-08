@@ -2,7 +2,7 @@
   post:
     summary: "Update Group ID for User by userId"
     description: "Updates the groupId for a specific user identified by userId. The request body must include the userId and the new_groupId."
-    tags: ["Users", "Group"]
+    tags: ["Users"]
     parameters:
       - name: "body"
         in: "body"

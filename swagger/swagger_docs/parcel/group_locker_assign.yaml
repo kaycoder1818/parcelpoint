@@ -1,7 +1,7 @@
 /users/group/locker-assign:
   post:
     summary: "Assign Locker to Group"
-    description: "Assigns a locker to all active users in a specific group. Requires the groupId and lockerAssignedForAll in the request body."
+    description: "Assigns a locker name to all active users in a specific group. Requires the groupId and lockerAssignedForAll in the request body."
     tags: ["Users"]
     parameters:
       - name: "body"
@@ -15,9 +15,9 @@
               description: "The unique identifier of the group"
               example: "group123"
             lockerAssignedForAll:
-              type: "boolean"
-              description: "Indicates whether the locker is assigned to all users in the group"
-              example: true
+              type: "string"
+              description: "Indicates the locker name to be assigned to all users in the group"
+              example: "locker1"
           required:
             - groupId
             - lockerAssignedForAll
