@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, render_template
 # from dotenv import load_dotenv
 import mysql.connector
 import os
@@ -2112,6 +2112,11 @@ else:
 # @app.route('/', methods=['GET'])
 # def index():
 #     return jsonify({"message": "Welcome to the appfinity API"})
+
+@app.route("/ui")
+def ui():
+    # Render the HTML template for the /ui route
+    return render_template("index.html")
 
 if __name__ == '__main__':
     app.run(debug=True)
