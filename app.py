@@ -15,42 +15,42 @@ setup_swagger(app)
 # Load environment variables from .env file
 # load_dotenv()
 
-# Retrieve MySQL connection details from environment variable
-mysql_details = os.getenv('MYSQL_DETAILS')
+# Check if the file "dev" exists
+if not os.path.exists('dev'):
+    # Retrieve MySQL connection details from environment variable
+    mysql_details = os.getenv('MYSQL_DETAILS')
 
-# Initialize the global db_connection variable
-db_connection = None
+    if mysql_details:
+        # Split the details by "@"
+        details = mysql_details.split('@')
 
-if mysql_details:
-    # Split the details by "@"
-    details = mysql_details.split('@')
-    
-    # Extract the individual values
-    host = details[0]
-    user = details[1]
-    password = details[2]
-    database = details[3]
-    port = int(details[4])
+        # Extract the individual values
+        host = details[0]
+        user = details[1]
+        password = details[2]
+        database = details[3]
+        port = int(details[4])
 
-    # MySQL connection setup
-    try:
-        db_connection = mysql.connector.connect(
-            host=host,
-            user=user,
-            password=password,
-            database=database,
-            port=port
-        )
-        print("Connection successful")
-    
-    except mysql.connector.Error as err:
-        # print(f"Error connecting to MySQL: {err}")
-        print(f"Error connecting to MySQL")
+        # MySQL connection setup
+        try:
+            db_connection = mysql.connector.connect(
+                host=host,
+                user=user,
+                password=password,
+                database=database,
+                port=port
+            )
+            print("Connection successful")
+
+        except mysql.connector.Error as err:
+            print(f"Error connecting to MySQL: {err}")
+            db_connection = None
+    else:
+        print("MYSQL_DETAILS environment variable is not set.")
         db_connection = None
-
 else:
-    print("MYSQL_DETAILS environment variable is not set.")
-    db_connection = None
+    print("File 'dev' exists. Skipping MySQL connection setup.")
+
 
 
 # Helper function to reconnect to MySQL
@@ -306,6 +306,45 @@ def create_activity_table():
     except mysql.connector.Error as e:
         return handle_mysql_error(e)
 
+@app.route('/create-table-watersense', methods=['GET'])
+def create_watersense_table():
+    try:
+        if not is_mysql_available():
+            return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
+        
+        cursor = get_cursor()
+        if cursor:
+            # Check if table 'watersense' exists
+            cursor.execute("SHOW TABLES LIKE 'watersense'")
+            table_exists = cursor.fetchone()
+            
+            if table_exists:
+                cursor.close()
+                return jsonify({"message": "Table 'watersense' already exists"}), 200
+            else:
+                # Define SQL query to create the table if it doesn't exist
+                sql_create_table = """
+                CREATE TABLE watersense (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    userid TEXT NOT NULL,
+                    indicator TEXT,
+                    phlevel TEXT,
+                    temperature TEXT,
+                    conductivity TEXT,
+                    turbidity TEXT,
+                    orp TEXT,
+                    tds TEXT,
+                    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+                """
+                cursor.execute(sql_create_table)
+                db_connection.commit()
+                cursor.close()
+                return jsonify({"message": "Table 'watersense' created successfully"}), 200
+        else:
+            return jsonify({"error": "Database connection not available"}), 500
+    except mysql.connector.Error as e:
+        return handle_mysql_error(e)
 
 ## ------ delete table ---------------- ##
 @app.route('/delete-table-users', methods=['GET'])
@@ -398,6 +437,23 @@ def delete_activity_table():
     except mysql.connector.Error as e:
         return handle_mysql_error(e)
 
+@app.route('/delete-table-watersense', methods=['GET'])
+def delete_watersense_table():
+    try:
+        if not is_mysql_available():
+            return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
+        
+        cursor = get_cursor()
+        if cursor:
+            # Drop the 'watersense' table
+            cursor.execute("DROP TABLE IF EXISTS watersense")
+            db_connection.commit()
+            cursor.close()
+            return jsonify({"message": "Table 'watersense' deleted successfully"}), 200
+        else:
+            return jsonify({"error": "Database connection not available"}), 500
+    except mysql.connector.Error as e:
+        return handle_mysql_error(e)
 
 ## ------ insert table ---------------- ##
 
@@ -516,6 +572,187 @@ def insert_mockup_activity():
     except mysql.connector.Error as e:
         return handle_mysql_error(e)
 
+@app.route('/insert-mockup-watersense', methods=['GET'])
+def insert_mockup_watersense():
+    try:
+        if not is_mysql_available():
+            return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
+        
+        cursor = get_cursor()
+        if cursor:
+            # Insert mock data into 'watersense' table
+            sql_insert = """
+            INSERT INTO watersense (userid, indicator, phlevel, temperature, conductivity, turbidity, orp, tds)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            """
+            data = (
+                '1234', 'check', '7.5', '25.5', '0.8', '5.2', '300', '400'
+            )
+            cursor.execute(sql_insert, data)
+            db_connection.commit()
+            cursor.close()
+            return jsonify({"message": "Mock data inserted into 'watersense' table"}), 200
+        else:
+            return jsonify({"error": "Database connection not available"}), 500
+    except mysql.connector.Error as e:
+        return handle_mysql_error(e)
+
+## ------ watersense routes ---------------- ##
+@app.route('/watersense', methods=['GET'])
+def show_watersense():
+    try:
+        if not is_mysql_available():
+            return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
+        
+        cursor = get_cursor()
+        if cursor:
+            # Fetch all records from the 'watersense' table
+            cursor.execute("SELECT * FROM watersense")
+            records = cursor.fetchall()
+
+            # Check if there are records
+            if records:
+                watersense_list = []
+                for record in records:
+                    watersense_data = {
+                        "id": record[0],
+                        "userid": record[1],
+                        "indicator": record[2],
+                        "phlevel": record[3],
+                        "temperature": record[4],
+                        "conductivity": record[5],
+                        "turbidity": record[6],
+                        "orp": record[7],
+                        "tds": record[8],
+                        "timestamp": record[9]
+                    }
+                    watersense_list.append(watersense_data)
+
+                cursor.close()
+                return jsonify({"watersense": watersense_list}), 200
+            else:
+                cursor.close()
+                return jsonify({"message": "No records found in 'watersense' table"}), 404
+        else:
+            return jsonify({"error": "Database connection not available"}), 500
+    except mysql.connector.Error as e:
+        return handle_mysql_error(e)
+
+@app.route('/get-watersense-by-userid/<string:userid>', methods=['GET'])
+def get_watersense_by_userid(userid):
+    try:
+        if not is_mysql_available():
+            return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
+        
+        cursor = get_cursor()
+        if cursor:
+            # Retrieve all records from 'watersense' by 'userid'
+            sql_select = """
+            SELECT * FROM watersense WHERE userid = %s
+            """
+            cursor.execute(sql_select, (userid,))
+            records = cursor.fetchall()
+            
+            # Check if any records are found
+            if records:
+                # Return records as JSON
+                return jsonify({"message": "Records fetched successfully", "data": records}), 200
+            else:
+                return jsonify({"message": f"No records found for userid: {userid}"}), 404
+        else:
+            return jsonify({"error": "Database connection not available"}), 500
+    except mysql.connector.Error as e:
+        return handle_mysql_error(e)
+
+@app.route('/update-watersense-by-userid', methods=['POST'])
+def update_watersense_by_userid():
+    try:
+        if not is_mysql_available():
+            return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
+        
+        # Get data from request body (JSON)
+        request_data = request.get_json()
+        
+        # Extract fields from the request body
+        userid = request_data.get('userid')
+        indicator = request_data.get('indicator')
+        phlevel = request_data.get('phlevel')
+        temperature = request_data.get('temperature')
+        conductivity = request_data.get('conductivity')
+        turbidity = request_data.get('turbidity')
+        orp = request_data.get('orp')
+        tds = request_data.get('tds')
+
+        # Ensure all necessary fields are provided
+        if not userid:
+            return jsonify({"error": "userid is required"}), 400
+        
+        cursor = get_cursor()
+        if cursor:
+            # Update all records for the specified 'userid'
+            sql_update = """
+            UPDATE watersense
+            SET indicator = %s,
+                phlevel = %s,
+                temperature = %s,
+                conductivity = %s,
+                turbidity = %s,
+                orp = %s,
+                tds = %s
+            WHERE userid = %s
+            """
+            data = (indicator, phlevel, temperature, conductivity, turbidity, orp, tds, userid)
+            cursor.execute(sql_update, data)
+            db_connection.commit()
+            cursor.close()
+            
+            return jsonify({"message": f"Records for userid '{userid}' updated successfully"}), 200
+        else:
+            return jsonify({"error": "Database connection not available"}), 500
+    except mysql.connector.Error as e:
+        return handle_mysql_error(e)
+
+@app.route('/update-column-by-userid', methods=['POST'])
+def update_column_by_userid():
+    try:
+        if not is_mysql_available():
+            return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
+        
+        # Get data from request body (JSON)
+        request_data = request.get_json()
+        
+        # Extract fields from the request body
+        userid = request_data.get('userid')
+        column_name = request_data.get('column_name')
+        new_value = request_data.get('new_value')
+
+        # Ensure required fields are provided
+        if not userid or not column_name or new_value is None:
+            return jsonify({"error": "userid, column_name, and new_value are required"}), 400
+        
+        # Validate if the column exists in the 'watersense' table
+        valid_columns = ['indicator', 'phlevel', 'temperature', 'conductivity', 'turbidity', 'orp', 'tds']
+        if column_name not in valid_columns:
+            return jsonify({"error": f"Invalid column name: {column_name}. Valid columns are {valid_columns}"}), 400
+        
+        cursor = get_cursor()
+        if cursor:
+            # Prepare SQL query to update the specified column for the given 'userid'
+            sql_update = f"""
+            UPDATE watersense
+            SET {column_name} = %s
+            WHERE userid = %s
+            """
+            data = (new_value, userid)
+            cursor.execute(sql_update, data)
+            db_connection.commit()
+            cursor.close()
+
+            return jsonify({"message": f"Column '{column_name}' for userid '{userid}' updated successfully"}), 200
+        else:
+            return jsonify({"error": "Database connection not available"}), 500
+    except mysql.connector.Error as e:
+        return handle_mysql_error(e)
 
 ## ------ users routes ---------------- ##
 
@@ -1007,7 +1244,6 @@ def update_group_by_userid():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
 
 @app.route('/users/status/by-userid', methods=['POST'])
 def update_status_by_userid():
@@ -1852,19 +2088,26 @@ def reconnect_mysql():
     else:
         return jsonify({"error": "Failed to reconnect to MySQL."}), 500
 
-
-@app.route('/', methods=['GET'])
-def index():
-    if is_mysql_available():
-        return jsonify({
-            "message": {
-                "status": "ok",
-                "developer": "kayven",
-                "email": "yvendee2020@gmail.com"
-            }
-        })
-    else:
-        return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
+# Check if the file "dev" exists
+if not os.path.exists('dev'):
+    # Execute this route if "dev" is not present and MySQL is available
+    @app.route('/', methods=['GET'])
+    def index():
+        if is_mysql_available():
+            return jsonify({
+                "message": {
+                    "status": "ok",
+                    "developer": "kayven",
+                    "email": "yvendee2020@gmail.com"
+                }
+            })
+        else:
+            return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
+else:
+    # Execute this route if "dev" exists
+    @app.route('/', methods=['GET'])
+    def index():
+        return jsonify({"message": "Welcome to the parcelpoint API"})
 
 # @app.route('/', methods=['GET'])
 # def index():

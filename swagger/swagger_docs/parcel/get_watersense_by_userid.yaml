@@ -1,0 +1,79 @@
+/get-watersense-by-userid/{userid}:
+  get:
+    summary: "Get Watersense Data by User ID"
+    description: "Fetches all watersense data records for a specified user by their unique user ID."
+    tags: ["Watersense"]
+    parameters:
+      - name: "userid"
+        in: "path"
+        required: true
+        description: "The unique identifier of the user whose watersense data is to be retrieved"
+        schema:
+          type: "string"
+        example: "user123"
+    responses:
+      '200':
+        description: "Records fetched successfully"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                message:
+                  type: "string"
+                  example: "Records fetched successfully"
+                data:
+                  type: "array"
+                  items:
+                    type: "object"
+                    properties:
+                      userid:
+                        type: "string"
+                        description: "The unique identifier of the user"
+                      indicator:
+                        type: "string"
+                        description: "The indicator of the water sense"
+                      phlevel:
+                        type: "number"
+                        format: "float"
+                        description: "The pH level of the water"
+                      temperature:
+                        type: "number"
+                        format: "float"
+                        description: "The temperature of the water in Celsius"
+                      conductivity:
+                        type: "number"
+                        format: "float"
+                        description: "The conductivity of the water in microsiemens"
+                      turbidity:
+                        type: "number"
+                        format: "float"
+                        description: "The turbidity level of the water"
+                      orp:
+                        type: "number"
+                        format: "float"
+                        description: "The Oxidation-Reduction Potential (ORP) of the water"
+                      tds:
+                        type: "number"
+                        format: "float"
+                        description: "The Total Dissolved Solids (TDS) of the water"
+      '404':
+        description: "No records found for the specified user ID"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                message:
+                  type: "string"
+                  example: "No records found for userid: user123"
+      '500':
+        description: "Internal Server Error if there is an issue with the database or MySQL connection"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "MySQL database not responding, please check the database service"

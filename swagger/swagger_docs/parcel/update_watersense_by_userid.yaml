@@ -1,0 +1,83 @@
+/update-watersense-by-userid:
+  post:
+    summary: "Update Watersense Data by User ID"
+    description: "Updates the watersense data for a given user by their unique user ID, including various water-related indicators such as pH level, temperature, and conductivity."
+    tags: ["Watersense"]
+    parameters:
+      - name: "body"
+        in: "body"
+        required: true
+        schema:
+          type: "object"
+          properties:
+            userid:
+              type: "string"
+              description: "The unique identifier of the user"
+              example: "user123"
+            indicator:
+              type: "string"
+              description: "The indicator of the water sense"
+              example: "Good"
+            phlevel:
+              type: "number"
+              format: "float"
+              description: "The pH level of the water"
+              example: 7.5
+            temperature:
+              type: "number"
+              format: "float"
+              description: "The temperature of the water in Celsius"
+              example: 22.5
+            conductivity:
+              type: "number"
+              format: "float"
+              description: "The conductivity of the water in microsiemens"
+              example: 150.0
+            turbidity:
+              type: "number"
+              format: "float"
+              description: "The turbidity level of the water"
+              example: 10.0
+            orp:
+              type: "number"
+              format: "float"
+              description: "The Oxidation-Reduction Potential (ORP) of the water"
+              example: 250.0
+            tds:
+              type: "number"
+              format: "float"
+              description: "The Total Dissolved Solids (TDS) of the water"
+              example: 300.0
+          required:
+            - userid
+    responses:
+      '200':
+        description: "Watersense data updated successfully"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                message:
+                  type: "string"
+                  example: "Records for userid 'user123' updated successfully"
+      '400':
+        description: "Bad Request if required fields are missing"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "userid is required"
+      '500':
+        description: "Internal Server Error if there is an issue with the database or MySQL connection"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "MySQL database not responding, please check the database service"

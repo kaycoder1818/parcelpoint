@@ -1,0 +1,85 @@
+/watersense:
+  get:
+    summary: "Get All Watersense Data"
+    description: "Fetches all records from the 'watersense' table, providing various water-related data such as pH level, temperature, and conductivity."
+    tags: ["Watersense"]
+    responses:
+      '200':
+        description: "Successfully fetched all watersense records"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                watersense:
+                  type: "array"
+                  items:
+                    type: "object"
+                    properties:
+                      id:
+                        type: "integer"
+                        description: "The unique ID of the record"
+                        example: 1
+                      userid:
+                        type: "string"
+                        description: "The unique identifier of the user"
+                        example: "user123"
+                      indicator:
+                        type: "string"
+                        description: "The indicator of the water sense"
+                        example: "Good"
+                      phlevel:
+                        type: "number"
+                        format: "float"
+                        description: "The pH level of the water"
+                        example: 7.5
+                      temperature:
+                        type: "number"
+                        format: "float"
+                        description: "The temperature of the water in Celsius"
+                        example: 22.5
+                      conductivity:
+                        type: "number"
+                        format: "float"
+                        description: "The conductivity of the water in microsiemens"
+                        example: 150.0
+                      turbidity:
+                        type: "number"
+                        format: "float"
+                        description: "The turbidity level of the water"
+                        example: 10.0
+                      orp:
+                        type: "number"
+                        format: "float"
+                        description: "The Oxidation-Reduction Potential (ORP) of the water"
+                        example: 250.0
+                      tds:
+                        type: "number"
+                        format: "float"
+                        description: "The Total Dissolved Solids (TDS) of the water"
+                        example: 300.0
+                      timestamp:
+                        type: "string"
+                        format: "date-time"
+                        description: "The timestamp when the record was created or last updated"
+                        example: "2025-03-21T10:30:00Z"
+      '404':
+        description: "No records found in the 'watersense' table"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                message:
+                  type: "string"
+                  example: "No records found in 'watersense' table"
+      '500':
+        description: "Internal Server Error if there is an issue with the database or MySQL connection"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "MySQL database not responding, please check the database service"

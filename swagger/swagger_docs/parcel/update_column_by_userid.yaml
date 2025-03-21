@@ -1,0 +1,59 @@
+/update-column-by-userid:
+  post:
+    summary: "Update a Specific Column by User ID"
+    description: "Updates a specific column in the 'watersense' table for a given user by their unique user ID. The column name and new value must be provided."
+    tags: ["Watersense"]
+    parameters:
+      - name: "body"
+        in: "body"
+        required: true
+        schema:
+          type: "object"
+          properties:
+            userid:
+              type: "string"
+              description: "The unique identifier of the user"
+              example: "1234"
+            column_name:
+              type: "string"
+              description: "The column in the watersense table to be updated"
+              example: "phlevel"
+            new_value:
+              type: "string"
+              description: "The new value to set for the specified column"
+              example: "8.0"
+          required:
+            - userid
+            - column_name
+            - new_value
+    responses:
+      '200':
+        description: "Column updated successfully"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                message:
+                  type: "string"
+                  example: "Column 'phlevel' for userid 'user123' updated successfully"
+      '400':
+        description: "Bad Request if required fields are missing or column name is invalid"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "userid, column_name, and new_value are required"
+      '500':
+        description: "Internal Server Error if there is an issue with the database or MySQL connection"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "MySQL database not responding, please check the database service"
