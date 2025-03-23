@@ -35,33 +35,51 @@ function saveData() {
 
 // Function to update the indicator with the correct symbol based on the value
 function updateIndicator(value, elementId) {
-    const indicatorContainer = document.getElementById(elementId);
+    try {
+        const indicatorContainer = document.getElementById(elementId);
+        
+        if (!indicatorContainer) {
+            throw new Error(`Element with ID ${elementId} not found.`);
+        }
 
-    // Ensure value is treated as a number for strict comparison
-    value = Number(value);
-    // console.log("indicator:",value);
+        // Ensure value is treated as a number for strict comparison
+        value = Number(value);
 
-    // Check if value is 1 (display ✔) or 0/other value (display X)
-    if (value === 1) {
-        indicatorContainer.innerHTML = `
-            <div class="horizontal-box">
-                <div class="circle-check-outside">
-                    <div class="circle-check">
-                        <span class="checkmark-inside">✔</span>
+        // Check if value is 1 (display ✔) or 0/other value (display X)
+        if (value === 1) {
+            indicatorContainer.innerHTML = `
+                <div class="horizontal-box">
+                    <div class="circle-check-outside">
+                        <div class="circle-check">
+                            <span class="checkmark-inside">✔</span>
+                        </div>
                     </div>
-                </div>
-            </div>`;
-    } else {
-        indicatorContainer.innerHTML = `
-            <div class="horizontal-box">
-                <div class="circle-check-outside">
-                    <div class="circle-check">
-                        <span class="checkmark-inside">✖</span>
+                </div>`;
+        } else {
+            indicatorContainer.innerHTML = `
+                <div class="horizontal-box">
+                    <div class="circle-check-outside">
+                        <div class="circle-check">
+                            <span class="checkmark-inside">✖</span>
+                        </div>
                     </div>
+                </div>`;
+        }
+    } catch (error) {
+        console.error("Error updating the indicator:", error);
+
+        indicatorContainer.innerHTML = `
+        <div class="horizontal-box">
+            <div class="circle-check-outside">
+                <div class="circle-check">
+                    <span class="checkmark-inside">✖</span>
                 </div>
-            </div>`;
+            </div>
+        </div>`;
+        
     }
 }
+
 
 // Function to fetch data and update gauges
 function fetchDataAndUpdateGauges() {
@@ -93,6 +111,9 @@ function fetchDataAndUpdateGauges() {
     fetch("https://parcelpoint.vercel.app/watersense")
         .then(response => response.json())
         .then(data => {
+
+            console.log(data);
+
             const watersense = data.watersense[0]; // Get the first record from the response
 
             // Update the localStorage with the new fetched data
