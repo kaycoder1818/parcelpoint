@@ -34,6 +34,25 @@
     white-space: nowrap;
     /*border: solid gray;*/
   }
+
+  .nested-box-image {
+    width: 50px;  /* Fixed width of the container */
+    height: 50px; /* Fixed height of the container */
+    overflow: hidden; /* Ensures the image does not overflow the container */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .app-logo {
+    width: 100%; /* Make the image width fit the container */
+    height: 100%; /* Make the image height fit the container */
+    object-fit: contain; /* Ensures the image fits inside the container without stretching */
+  }
+
+  .nested-box-bold {
+    font-weight: bold; /* Make the text bold */
+  }
   
   .spacer-box {
     width: 120px;  

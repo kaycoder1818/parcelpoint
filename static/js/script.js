@@ -11,7 +11,8 @@ function navigateToHistory() {
     setTimeout(function() {
 	    button.style.display = 'block';
 	    spinner.style.display = 'none';
-	    window.location.href = '/history.html';
+	    // window.location.href = '/history.html';
+        window.location.href = '/history';
     }, 500); 
 
 }
@@ -34,8 +35,6 @@ function saveData() {
 	    }, 500); 
 
     }, 500); 
-
-    
 }
 
 
@@ -44,8 +43,8 @@ function fetchDataAndUpdateGauges() {
     fetch("https://parcelpoint.vercel.app/watersense")
         .then(response => response.json())
         .then(data => {
+            console.log("from watersense:", data);
             const watersense = data.watersense[0]; // Get the first record from the response
-
             // Update the gauges with the fetched data
             document.querySelector('.card-gauge .number-gauge').textContent = watersense.phlevel;
             document.querySelectorAll('.card-gauge')[1].querySelector('.number-gauge').textContent = watersense.temperature;
