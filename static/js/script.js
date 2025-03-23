@@ -39,6 +39,7 @@ function updateIndicator(value, elementId) {
 
     // Ensure value is treated as a number for strict comparison
     value = Number(value);
+    console.log("indicator:",value);
 
     // Check if value is 1 (display ✔) or 0/other value (display X)
     if (value === 1) {
