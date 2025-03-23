@@ -712,6 +712,55 @@ def update_watersense_by_userid():
     except mysql.connector.Error as e:
         return handle_mysql_error(e)
 
+@app.route('/update-watersense-fixed', methods=['POST'])
+def update_watersense_fixed():
+    try:
+        if not is_mysql_available():
+            return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
+        
+        # Get data from request body (JSON)
+        request_data = request.get_json()
+        
+        # Fixed userid = 1234
+        userid = "1234"
+        indicator = request_data.get('indicator')
+        phlevel = request_data.get('phlevel')
+        temperature = request_data.get('temperature')
+        conductivity = request_data.get('conductivity')
+        turbidity = request_data.get('turbidity')
+        orp = request_data.get('orp')
+        tds = request_data.get('tds')
+
+        # Ensure necessary fields are provided
+        if not indicator or not phlevel or not temperature or not conductivity or not turbidity or not orp or not tds:
+            return jsonify({"error": "All fields are required"}), 400
+        
+        cursor = get_cursor()
+        if cursor:
+            # Update records for userid '1234'
+            sql_update = """
+            UPDATE watersense
+            SET indicator = %s,
+                phlevel = %s,
+                temperature = %s,
+                conductivity = %s,
+                turbidity = %s,
+                orp = %s,
+                tds = %s
+            WHERE userid = %s
+            """
+            data = (indicator, phlevel, temperature, conductivity, turbidity, orp, tds, userid)
+            cursor.execute(sql_update, data)
+            db_connection.commit()
+            cursor.close()
+            
+            return jsonify({"message": f"Records for userid '1234' updated successfully"}), 200
+        else:
+            return jsonify({"error": "Database connection not available"}), 500
+    except mysql.connector.Error as e:
+        return handle_mysql_error(e)
+
+
 @app.route('/update-column-by-userid', methods=['POST'])
 def update_column_by_userid():
     try:
