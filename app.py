@@ -732,7 +732,7 @@ def update_watersense_fixed():
         tds = request_data.get('tds')
 
         # Ensure necessary fields are provided
-        if not phlevel or not temperature or not conductivity or not turbidity or not orp or not tds:
+        if not indicator or not phlevel or not temperature or not conductivity or not turbidity or not orp or not tds:
             return jsonify({"error": "All fields are required"}), 400
         
         cursor = get_cursor()
