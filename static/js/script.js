@@ -37,6 +37,9 @@ function saveData() {
 function updateIndicator(value, elementId) {
     const indicatorContainer = document.getElementById(elementId);
 
+    // Ensure value is treated as a number for strict comparison
+    value = Number(value);
+
     // Check if value is 1 (display ✔) or 0/other value (display X)
     if (value === 1) {
         indicatorContainer.innerHTML = `
