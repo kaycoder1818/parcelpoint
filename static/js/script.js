@@ -1,4 +1,3 @@
-// script.js
 // Function to handle the history button click
 function navigateToHistory() {
     const button = document.getElementById("history-button");
@@ -10,7 +9,7 @@ function navigateToHistory() {
     setTimeout(function() {
         button.style.display = 'block';
         spinner.style.display = 'none';
-        window.location.href = '/history';
+        window.location.href = '/history.html';
     }, 500); 
 }
 
@@ -30,6 +29,7 @@ function saveData() {
         setTimeout(function() {
             alert('Save button clicked');
         }, 500); 
+
     }, 500); 
 }
 
@@ -37,27 +37,19 @@ function saveData() {
 function updateIndicator(value, elementId) {
     const indicatorContainer = document.getElementById(elementId);
 
-    // Ensure value is treated as a number for strict comparison
-    value = Number(value);
-    console.log("indicator:",value);
-
-    // Check if value is 1 (display ✔) or 0/other value (display X)
+    // Check if value is 1 (display ✔) or 0/other value (display ✖)
     if (value === 1) {
         indicatorContainer.innerHTML = `
-            <div class="horizontal-box">
-                <div class="circle-check-outside">
-                    <div class="circle-check">
-                        <span class="checkmark-inside">✔</span>
-                    </div>
+            <div class="circle-check-outside">
+                <div class="circle-check">
+                    <span class="checkmark-inside">✔</span>
                 </div>
             </div>`;
     } else {
         indicatorContainer.innerHTML = `
-            <div class="horizontal-box">
-                <div class="circle-check-outside">
-                    <div class="circle-check">
-                        <span class="checkmark-inside">✖</span>
-                    </div>
+            <div class="circle-check-outside">
+                <div class="circle-check">
+                    <span class="checkmark-inside">✖</span>
                 </div>
             </div>`;
     }
@@ -76,8 +68,7 @@ function fetchDataAndUpdateGauges() {
             conductivity: 0,
             turbidity: 0,
             orp: 0,
-            tds: 0,
-            indicator: 0  // Default indicator value
+            tds: 0
         };
     }
 
@@ -93,32 +84,36 @@ function fetchDataAndUpdateGauges() {
     fetch("https://parcelpoint.vercel.app/watersense")
         .then(response => response.json())
         .then(data => {
-            const watersense = data.watersense[0]; // Get the first record from the response
+            if (data && data.watersense && data.watersense.length > 0) {
+                const watersense = data.watersense[0]; // Get the first record from the response
 
-            // Update the localStorage with the new fetched data
-            const updatedValues = {
-                phlevel: watersense.phlevel,
-                temperature: watersense.temperature,
-                conductivity: watersense.conductivity,
-                turbidity: watersense.turbidity,
-                orp: watersense.orp,
-                tds: watersense.tds,
-                indicator: watersense.indicator  // Get the indicator value
-            };
+                // Update the localStorage with the new fetched data
+                const updatedValues = {
+                    phlevel: watersense.phlevel,
+                    temperature: watersense.temperature,
+                    conductivity: watersense.conductivity,
+                    turbidity: watersense.turbidity,
+                    orp: watersense.orp,
+                    tds: watersense.tds,
+                    indicator: watersense.indicator // Assuming the indicator is in the API response
+                };
 
-            // Store the updated values in localStorage
-            localStorage.setItem('gaugeValues', JSON.stringify(updatedValues));
+                // Store the updated values in localStorage
+                localStorage.setItem('gaugeValues', JSON.stringify(updatedValues));
 
-            // Update the gauges with the new values
-            document.querySelector('.card-gauge .number-gauge').textContent = updatedValues.phlevel;
-            document.querySelectorAll('.card-gauge')[1].querySelector('.number-gauge').textContent = updatedValues.temperature;
-            document.querySelectorAll('.card-gauge')[2].querySelector('.number-gauge').textContent = updatedValues.conductivity;
-            document.querySelectorAll('.card-gauge')[3].querySelector('.number-gauge').textContent = updatedValues.turbidity;
-            document.querySelectorAll('.card-gauge')[4].querySelector('.number-gauge').textContent = updatedValues.orp;
-            document.querySelectorAll('.card-gauge')[5].querySelector('.number-gauge').textContent = updatedValues.tds;
+                // Update the gauges with the new values
+                document.querySelector('.card-gauge .number-gauge').textContent = updatedValues.phlevel;
+                document.querySelectorAll('.card-gauge')[1].querySelector('.number-gauge').textContent = updatedValues.temperature;
+                document.querySelectorAll('.card-gauge')[2].querySelector('.number-gauge').textContent = updatedValues.conductivity;
+                document.querySelectorAll('.card-gauge')[3].querySelector('.number-gauge').textContent = updatedValues.turbidity;
+                document.querySelectorAll('.card-gauge')[4].querySelector('.number-gauge').textContent = updatedValues.orp;
+                document.querySelectorAll('.card-gauge')[5].querySelector('.number-gauge').textContent = updatedValues.tds;
 
-            // Update the indicator based on the API response
-            updateIndicator(updatedValues.indicator, 'check-indicator');
+                // Update the indicator based on the value in the response
+                updateIndicator(updatedValues.indicator, 'check-indicator');
+            } else {
+                console.error("Invalid or empty 'watersense' data received");
+            }
         })
         .catch(error => {
             console.error("Error fetching data:", error);
