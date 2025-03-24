@@ -980,24 +980,18 @@ def fetch_watersense_history():
         if cursor:
             cursor.execute(sql_query)
             result = cursor.fetchall()
+            columns = [desc[0] for desc in cursor.description]  # Get column names from cursor description
             cursor.close()
 
             # Format the result to match the required output
             formatted_result = [
-                {
-                    "conductivity": row["conductivity"],
-                    "id": row["id"],
-                    "indicator": row["indicator"],
-                    "orp": row["orp"],
-                    "phlevel": row["phlevel"],
-                    "tds": row["tds"],
-                    "temperature": row["temperature"],
-                    "timestamp": row["timestamp"].strftime("%a, %d %b %Y %H:%M:%S GMT"),
-                    "turbidity": row["turbidity"],
-                    "userid": row["userid"]
-                }
+                dict(zip(columns, row))  # Map column names to the corresponding values in the row
                 for row in result
             ]
+
+            # Format the timestamp to the required format
+            for entry in formatted_result:
+                entry["timestamp"] = entry["timestamp"].strftime("%a, %d %b %Y %H:%M:%S GMT")
             
             return jsonify(formatted_result), 200
         else:
