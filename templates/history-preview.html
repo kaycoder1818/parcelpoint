@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WaterSense</title>
+    <!-- Link to the index.css file -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+    <script src="{{ url_for('static', filename='js/script2.js') }}" defer></script>
+</head>
+<body>
+  <div class="dashboard-wrapper">
+
+    <div class="horizontal-box" >
+      <div class="nested-box-image" >
+        <img src="{{ url_for('static', filename='images/app-logo.jpg') }}" onclick="navigateToIndex()">
+      </div>
+      <div class="nested-box nested-box-bold" >
+        S.P.L.A.S.H
+      </div>
+      <div class="nested-box" >
+        <div class="spacer-box"> </div>
+      </div>
+
+      <div class="nested-box">
+        <div class="spacer2-box"> </div>
+<!--         <div class="icon-container" id="history-button"  onclick="navigateToHistory()">
+          <img src="history.svg" alt="History Icon" class="history-icon">
+        </div>
+        <div class="spinner" id="history-spinner"></div> -->
+      </div>
+
+    </div>
+
+    <div class="horizontal-box"  id="check-indicator">
+      <div class="check-indicator" id="check-indicator">
+        <div class="circle-check-outside">
+          <div class="circle-check">
+            <span class="checkmark-inside">✖</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="horizontal-box" >
+      <div class="nested-box nested-box-bold" >
+        RESULTS SUMMARY
+      </div>
+      <div class="nested-box" >
+        <div class="spacer-box"> </div> 
+      </div>
+    </div>
+
+    <div class="horizontal-box" >
+      <div class="nested-box" >
+        <div class="card-gauge">
+            <div class="number-gauge">0</div>
+            <div class="label-gauge">PH LEVEL</div>
+        </div>
+      </div>
+      <div class="nested-box" >
+        <div class="nested-box" >
+        <div class="card-gauge">
+            <div class="number-gauge">0</div>
+            <div class="label-gauge">TEMPERATURE (°C)</div>
+        </div>
+      </div>
+      </div>
+    </div>
+
+    <div class="horizontal-box" >
+      <div class="nested-box" >
+        <div class="card-gauge">
+            <div class="number-gauge">0</div>
+            <div class="label-gauge">CONDUCTIVITY</div>
+        </div>
+      </div>
+      <div class="nested-box" >
+        <div class="nested-box" >
+        <div class="card-gauge">
+            <div class="number-gauge">0</div>
+            <div class="label-gauge">TURBIDITY (NTU)</div>
+        </div>
+      </div>
+      </div>
+    </div>
+
+    <div class="horizontal-box" >
+      <div class="nested-box" >
+        <div class="card-gauge">
+            <div class="number-gauge">0</div>
+            <div class="label-gauge">Oxidation</div>
+            <div class="label-gauge">reduction</div>
+            <div class="label-gauge">potential (Orp)</div>
+        </div>
+      </div>
+      <div class="nested-box" >
+        <div class="nested-box" >
+        <div class="card-gauge">
+            <div class="number-gauge">0</div>
+            <div class="label-gauge">Total dissolve</div>
+            <div class="label-gauge">solids (Tds)</div>
+        </div>
+      </div>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>

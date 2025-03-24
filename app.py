@@ -1037,6 +1037,7 @@ def delete_old_watersense_history():
         return handle_mysql_error(e)
 
 
+
 ## ------ users routes ---------------- ##
 
 ## show the all the records of table 'users'
@@ -2400,6 +2401,16 @@ else:
 def ui():
     # Render the HTML template for the /ui route
     return render_template("index.html")
+
+@app.route("/history")
+def ui():
+    # Render the HTML template for the /history route
+    return render_template("history.html")
+
+@app.route("/history-preview")
+def ui():
+    # Render the HTML template for the /history route
+    return render_template("history-preview.html")
 
 if __name__ == '__main__':
     app.run(debug=True)
