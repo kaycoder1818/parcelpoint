@@ -668,11 +668,11 @@ def insert_mockup_watersense_history():
         if cursor:
             # Insert mock data into 'watersense_history' table
             sql_insert = """
-            INSERT INTO watersense_history (userid, indicator, phlevel, temperature, conductivity, turbidity, orp, tds, timestamp)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+            INSERT INTO watersense_history (userid, indicator, phlevel, temperature, conductivity, turbidity, orp, tds)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
             """
             data = (
-                '1234', '1', '5.7', '29', '3000', '4000', '5000', '6000', 'Fri, 06 Mar 2025 18:52:00 GMT'
+                '1234', '1', '5.7', '29', '3000', '4000', '5000', '6000'
             )
             cursor.execute(sql_insert, data)
             db_connection.commit()
