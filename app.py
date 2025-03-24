@@ -683,7 +683,6 @@ def insert_mockup_watersense_history():
     except mysql.connector.Error as e:
         return handle_mysql_error(e)
 
-
 ## ------ watersense routes ---------------- ##
 @app.route('/watersense', methods=['GET'])
 def show_watersense():
