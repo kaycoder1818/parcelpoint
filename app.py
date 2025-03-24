@@ -346,6 +346,48 @@ def create_watersense_table():
     except mysql.connector.Error as e:
         return handle_mysql_error(e)
 
+
+@app.route('/create-table-watersense-history', methods=['GET'])
+def create_watersense_history_table():
+    try:
+        if not is_mysql_available():
+            return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
+        
+        cursor = get_cursor()
+        if cursor:
+            # Check if table 'watersense_history' exists
+            cursor.execute("SHOW TABLES LIKE 'watersense_history'")
+            table_exists = cursor.fetchone()
+            
+            if table_exists:
+                cursor.close()
+                return jsonify({"message": "Table 'watersense_history' already exists"}), 200
+            else:
+                # Define SQL query to create the table if it doesn't exist
+                sql_create_table = """
+                CREATE TABLE watersense_history (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    userid TEXT NOT NULL,
+                    indicator TEXT,
+                    phlevel TEXT,
+                    temperature TEXT,
+                    conductivity TEXT,
+                    turbidity TEXT,
+                    orp TEXT,
+                    tds TEXT,
+                    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+                """
+                cursor.execute(sql_create_table)
+                db_connection.commit()
+                cursor.close()
+                return jsonify({"message": "Table 'watersense_history' created successfully"}), 200
+        else:
+            return jsonify({"error": "Database connection not available"}), 500
+    except mysql.connector.Error as e:
+        return handle_mysql_error(e)
+
+
 ## ------ delete table ---------------- ##
 @app.route('/delete-table-users', methods=['GET'])
 def delete_users_table():
@@ -454,6 +496,25 @@ def delete_watersense_table():
             return jsonify({"error": "Database connection not available"}), 500
     except mysql.connector.Error as e:
         return handle_mysql_error(e)
+
+@app.route('/delete-table-watersense-history', methods=['GET'])
+def delete_watersense_history_table():
+    try:
+        if not is_mysql_available():
+            return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
+        
+        cursor = get_cursor()
+        if cursor:
+            # Drop the 'watersense_history' table
+            cursor.execute("DROP TABLE IF EXISTS watersense_history")
+            db_connection.commit()
+            cursor.close()
+            return jsonify({"message": "Table 'watersense_history' deleted successfully"}), 200
+        else:
+            return jsonify({"error": "Database connection not available"}), 500
+    except mysql.connector.Error as e:
+        return handle_mysql_error(e)
+
 
 ## ------ insert table ---------------- ##
 
@@ -596,6 +657,32 @@ def insert_mockup_watersense():
             return jsonify({"error": "Database connection not available"}), 500
     except mysql.connector.Error as e:
         return handle_mysql_error(e)
+
+@app.route('/insert-mockup-watersense-history', methods=['GET'])
+def insert_mockup_watersense_history():
+    try:
+        if not is_mysql_available():
+            return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
+        
+        cursor = get_cursor()
+        if cursor:
+            # Insert mock data into 'watersense_history' table
+            sql_insert = """
+            INSERT INTO watersense_history (userid, indicator, phlevel, temperature, conductivity, turbidity, orp, tds, timestamp)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """
+            data = (
+                '1234', '1', '5.7', '29', '3000', '4000', '5000', '6000', 'Fri, 06 Mar 2025 18:52:00 GMT'
+            )
+            cursor.execute(sql_insert, data)
+            db_connection.commit()
+            cursor.close()
+            return jsonify({"message": "Mock data inserted into 'watersense_history' table"}), 200
+        else:
+            return jsonify({"error": "Database connection not available"}), 500
+    except mysql.connector.Error as e:
+        return handle_mysql_error(e)
+
 
 ## ------ watersense routes ---------------- ##
 @app.route('/watersense', methods=['GET'])
@@ -760,7 +847,6 @@ def update_watersense_fixed():
     except mysql.connector.Error as e:
         return handle_mysql_error(e)
 
-
 @app.route('/update-column-by-userid', methods=['POST'])
 def update_column_by_userid():
     try:
@@ -798,6 +884,123 @@ def update_column_by_userid():
             cursor.close()
 
             return jsonify({"message": f"Column '{column_name}' for userid '{userid}' updated successfully"}), 200
+        else:
+            return jsonify({"error": "Database connection not available"}), 500
+    except mysql.connector.Error as e:
+        return handle_mysql_error(e)
+
+
+@app.route('/update-watersense-and-history', methods=['POST'])
+def update_watersense_and_history():
+    try:
+        if not is_mysql_available():
+            return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
+        
+        # Get data from request body (JSON)
+        request_data = request.get_json()
+        
+        # Fixed userid = 1234
+        userid = "1234"
+        indicator = request_data.get('indicator')
+        phlevel = request_data.get('phlevel')
+        temperature = request_data.get('temperature')
+        conductivity = request_data.get('conductivity')
+        turbidity = request_data.get('turbidity')
+        orp = request_data.get('orp')
+        tds = request_data.get('tds')
+
+        # Ensure necessary fields are provided
+        if not indicator or not phlevel or not temperature or not conductivity or not turbidity or not orp or not tds:
+            return jsonify({"error": "All fields are required"}), 400
+        
+        cursor = get_cursor()
+        if cursor:
+            # Update records for userid '1234' in 'watersense' table
+            sql_update = """
+            UPDATE watersense
+            SET indicator = %s,
+                phlevel = %s,
+                temperature = %s,
+                conductivity = %s,
+                turbidity = %s,
+                orp = %s,
+                tds = %s
+            WHERE userid = %s
+            """
+            data = (indicator, phlevel, temperature, conductivity, turbidity, orp, tds, userid)
+            cursor.execute(sql_update, data)
+            db_connection.commit()
+
+            # Insert the updated data into 'watersense_history' table
+            sql_insert = """
+            INSERT INTO watersense_history (userid, indicator, phlevel, temperature, conductivity, turbidity, orp, tds)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            """
+            cursor.execute(sql_insert, (userid, indicator, phlevel, temperature, conductivity, turbidity, orp, tds))
+            db_connection.commit()
+
+            cursor.close()
+
+            return jsonify({"message": "Data sent successfully"}), 200
+            # return jsonify({"message": "Records updated in 'watersense' and new record inserted into 'watersense_history'"}), 200
+        else:
+            return jsonify({"error": "Database connection not available"}), 500
+    except mysql.connector.Error as e:
+        return handle_mysql_error(e)
+
+
+@app.route('/fetch-watersense-history', methods=['GET'])
+def fetch_watersense_history():
+    try:
+        # Get the period from the query parameters (if provided)
+        period = request.args.get('period', None)
+
+        # Calculate the date range based on the period
+        if period:
+            # Ensure the period is a valid integer (months)
+            try:
+                period = int(period)
+            except ValueError:
+                return jsonify({"error": "Invalid period value. It must be an integer."}), 400
+
+            # Calculate the start date for the period (current date minus 'period' months)
+            end_date = datetime.now()
+            start_date = end_date - timedelta(days=period * 30)  # Approximate each month as 30 days
+            date_filter = f"AND timestamp >= '{start_date.strftime('%Y-%m-%d %H:%M:%S')}'"
+        else:
+            date_filter = ""  # No filter, return all data
+
+        # Query the 'watersense_history' table
+        sql_query = f"""
+        SELECT * FROM watersense_history
+        WHERE 1 {date_filter}
+        ORDER BY timestamp DESC
+        """
+        
+        cursor = get_cursor()
+        if cursor:
+            cursor.execute(sql_query)
+            result = cursor.fetchall()
+            cursor.close()
+
+            # Format the result to match the required output
+            formatted_result = [
+                {
+                    "conductivity": row["conductivity"],
+                    "id": row["id"],
+                    "indicator": row["indicator"],
+                    "orp": row["orp"],
+                    "phlevel": row["phlevel"],
+                    "tds": row["tds"],
+                    "temperature": row["temperature"],
+                    "timestamp": row["timestamp"].strftime("%a, %d %b %Y %H:%M:%S GMT"),
+                    "turbidity": row["turbidity"],
+                    "userid": row["userid"]
+                }
+                for row in result
+            ]
+            
+            return jsonify(formatted_result), 200
         else:
             return jsonify({"error": "Database connection not available"}), 500
     except mysql.connector.Error as e:
