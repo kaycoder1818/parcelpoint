@@ -999,6 +999,44 @@ def fetch_watersense_history():
     except mysql.connector.Error as e:
         return handle_mysql_error(e)
 
+@app.route('/delete-old-watersense-history', methods=['GET'])
+def delete_old_watersense_history():
+    try:
+        if not is_mysql_available():
+            return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
+        
+        cursor = get_cursor()
+        if cursor:
+            # Step 1: Get the IDs of the latest 20 records
+            sql_latest_20 = """
+            SELECT id FROM watersense_history
+            ORDER BY timestamp DESC
+            LIMIT 20
+            """
+            cursor.execute(sql_latest_20)
+            latest_20_ids = [row["id"] for row in cursor.fetchall()]
+            
+            if not latest_20_ids:
+                return jsonify({"message": "No records found in the watersense_history table"}), 200
+
+            # Step 2: Delete all records except the latest 20
+            # We'll delete records whose id is not in the list of latest 20 IDs
+            ids_to_delete = tuple(latest_20_ids)
+            sql_delete = f"""
+            DELETE FROM watersense_history
+            WHERE id NOT IN {ids_to_delete}
+            """
+            cursor.execute(sql_delete)
+            db_connection.commit()
+            cursor.close()
+            
+            return jsonify({"message": "Old records deleted, keeping the latest 20 records"}), 200
+        else:
+            return jsonify({"error": "Database connection not available"}), 500
+    except mysql.connector.Error as e:
+        return handle_mysql_error(e)
+
+
 ## ------ users routes ---------------- ##
 
 ## show the all the records of table 'users'
