@@ -2403,12 +2403,12 @@ def ui():
     return render_template("index.html")
 
 @app.route("/history")
-def ui():
+def history():
     # Render the HTML template for the /history route
     return render_template("history.html")
 
 @app.route("/history-preview")
-def ui():
+def history_preview():
     # Render the HTML template for the /history route
     return render_template("history-preview.html")
 
